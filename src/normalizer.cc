@@ -13,6 +13,10 @@
 #include <utility>
 #include <vector>
 
+namespace tokenizers {
+
+namespace normalizers {
+
 // When transforming characters of input after normalization
 // adjust the removal or addition of characters in the offsets
 // based on the operations performed on the input.
@@ -125,7 +129,6 @@ void doHandleChineseChars(NormalizerResult* input) {
   std::vector<std::pair<int, int>> ops;
   for (it.first(); it.hasNext();) {
     UChar32 c = it.next32PostInc();
-    std::pair<int, int> offset = {it.getIndex() - 1, it.getIndex()};
     if (isChineseChar(c)) {
       result.append(' ');
       result.append(c);
@@ -147,7 +150,6 @@ void doStripAccents(NormalizerResult* input) {
     throw std::runtime_error(
         std::string("failed to get normalizer instance: ") +
         u_errorName(error_code));
-    return;
   }
 
   icu::UnicodeString normalized;
@@ -155,7 +157,6 @@ void doStripAccents(NormalizerResult* input) {
   if (U_FAILURE(error_code)) {
     throw std::runtime_error(std::string("failed to normalize string input: ") +
                              u_errorName(error_code));
-    return;
   }
 
   icu::UnicodeString result;
@@ -195,3 +196,7 @@ bool isChineseChar(UChar32 c) {
           block == UBLOCK_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_F ||
           block == UBLOCK_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_G);
 }
+
+} // namespace normalizers
+
+} // namespace tokenizers

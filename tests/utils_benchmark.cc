@@ -7,6 +7,16 @@
 #include "tokenizers/common.h"
 #include "tokenizers/utils.h"
 
+using tokenizers::Encoding;
+using tokenizers::Padding;
+using tokenizers::PaddingDirection;
+using tokenizers::PaddingStrategy;
+using tokenizers::PadEncoding;
+using tokenizers::TruncateEncoding;
+using tokenizers::Truncation;
+using tokenizers::TruncationDirection;
+using tokenizers::TruncationStrategy;
+
 static void BM_TruncateEncodingGreaterMaxLength(
     benchmark::State& state) { // NOLINT
   Encoding input({1, 2, 3, 4, 5}, {0, 0, 0, 0, 0}, {"a", "b", "c", "d", "e"},

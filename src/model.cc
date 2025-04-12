@@ -9,6 +9,10 @@
 #include <utility>
 #include <vector>
 
+namespace tokenizers {
+
+namespace models {
+
 Model::Model() {}
 
 std::vector<Token> Model::Tokenize(const icu::UnicodeString& input,
@@ -91,3 +95,7 @@ std::vector<Token> WordPiece::TokenizeString(const std::string& input) {
   icu::UnicodeString unicode_input = icu::UnicodeString::fromUTF8(input);
   return Tokenize(unicode_input);
 }
+
+} // namespace models
+
+} // namespace tokenizers

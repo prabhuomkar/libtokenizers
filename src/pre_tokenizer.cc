@@ -11,6 +11,10 @@
 #include <utility>
 #include <vector>
 
+namespace tokenizers {
+
+namespace pre_tokenizers {
+
 PreTokenizerResult::PreTokenizerResult() : pre_tokenized({}), offsets({}) {}
 
 PreTokenizerResult::PreTokenizerResult(const icu::UnicodeString& pre_tokenized)
@@ -196,3 +200,7 @@ BertPreTokenizer::PreTokenizeString(const std::string& input) {
   }
   return result;
 }
+
+} // namespace pre_tokenizers
+
+} // namespace tokenizers

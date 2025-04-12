@@ -8,6 +8,10 @@
 
 #include "tokenizers/common.h"
 
+using tokenizers::Token;
+using tokenizers::models::Model;
+using tokenizers::models::WordPiece;
+
 void assertModelValues(const std::vector<Token>& got,
                        const std::vector<Token>& expected) {
   ASSERT_EQ(got.size(), expected.size());

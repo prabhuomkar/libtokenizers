@@ -9,6 +9,11 @@
 
 #include "tokenizers/common.h"
 
+using tokenizers::Encoding;
+using tokenizers::post_processors::PostProcessor;
+using tokenizers::post_processors::TemplateProcessing;
+using tokenizers::post_processors::TemplateProcessor;
+
 void assertPostProcessorValues(const std::vector<Encoding>& got,
                                const std::vector<Encoding>& expected) {
   ASSERT_EQ(got.size(), expected.size());

@@ -1,6 +1,10 @@
 // Copyright 2025 Omkar Prabhu
 #pragma once
 
+namespace tokenizers {
+
+namespace decoders {
+
 class Decoder {
  public:
   Decoder();
@@ -13,3 +17,7 @@ class WordPieceDecoder : public Decoder {
  public:
   WordPieceDecoder();
 };
+
+} // namespace decoders
+
+} // namespace tokenizers

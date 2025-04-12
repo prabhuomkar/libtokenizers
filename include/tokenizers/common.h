@@ -11,6 +11,8 @@
 #include <utility>
 #include <vector>
 
+namespace tokenizers {
+
 class Encoding {
  public:
   Encoding();
@@ -61,3 +63,5 @@ inline int64_t get_int64_or_default(simdjson::ondemand::value &&val,
   auto result = val[key].get_int64();
   return result.error() == simdjson::SUCCESS ? result.value() : def;
 }
+
+} // namespace tokenizers

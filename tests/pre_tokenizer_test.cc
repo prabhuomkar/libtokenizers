@@ -7,6 +7,11 @@
 #include <utility>
 #include <vector>
 
+using tokenizers::pre_tokenizers::BertPreTokenizer;
+using tokenizers::pre_tokenizers::PreTokenizer;
+using tokenizers::pre_tokenizers::PreTokenizerResult;
+using tokenizers::pre_tokenizers::SplitDelimiterBehavior;
+
 void assertPreTokenizerValues(const PreTokenizerResult& got,
                               const PreTokenizerResult& expected) {
   ASSERT_EQ(got.pre_tokenized.size(), expected.pre_tokenized.size());

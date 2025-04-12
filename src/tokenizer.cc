@@ -12,6 +12,8 @@
 
 #include "tokenizers/common.h"
 
+namespace tokenizers {
+
 std::string parseVersion(simdjson::ondemand::document& config) {
   auto version_result = config["version"].get_string();
   return version_result.error() == simdjson::SUCCESS
@@ -19,13 +21,14 @@ std::string parseVersion(simdjson::ondemand::document& config) {
              : "";
 }
 
-std::shared_ptr<Normalizer> parseNormalizer(simdjson::ondemand::value& config) {
+std::shared_ptr<normalizers::Normalizer> parseNormalizer(
+    simdjson::ondemand::value& config) {
   if (config.is_null())
     return nullptr;
 
   std::string type = get_string_or_default(std::move(config), "type");
   if (type == "BertNormalizer") {
-    return std::make_shared<BertNormalizer>(
+    return std::make_shared<normalizers::BertNormalizer>(
         get_bool_or_default(std::move(config), "clean_text"),
         get_bool_or_default(std::move(config), "handle_chinese_chars"),
         get_bool_or_default(std::move(config), "strip_accents", true),
@@ -34,19 +37,19 @@ std::shared_ptr<Normalizer> parseNormalizer(simdjson::ondemand::value& config) {
   return nullptr;
 }
 
-std::shared_ptr<PreTokenizer> parsePreTokenizer(
+std::shared_ptr<pre_tokenizers::PreTokenizer> parsePreTokenizer(
     simdjson::ondemand::value& config) {
   if (config.is_null())
     return nullptr;
 
   std::string type = get_string_or_default(std::move(config), "type");
   if (type == "BertPreTokenizer") {
-    return std::make_shared<BertPreTokenizer>();
+    return std::make_shared<pre_tokenizers::BertPreTokenizer>();
   }
   return nullptr;
 }
 
-std::shared_ptr<Model> parseModel(simdjson::ondemand::value& config) {
+std::shared_ptr<models::Model> parseModel(simdjson::ondemand::value& config) {
   if (config.is_null())
     return nullptr;
 
@@ -58,7 +61,7 @@ std::shared_ptr<Model> parseModel(simdjson::ondemand::value& config) {
           static_cast<int>(static_cast<int64_t>(element.value()));
     }
 
-    return std::make_shared<WordPiece>(
+    return std::make_shared<models::WordPiece>(
         vocab, get_string_or_default(std::move(config), "unk_token"),
         get_string_or_default(std::move(config), "continuing_subword_prefix"),
         get_int64_or_default(std::move(config), "max_input_chars_per_word", 0));
@@ -66,7 +69,7 @@ std::shared_ptr<Model> parseModel(simdjson::ondemand::value& config) {
   return nullptr;
 }
 
-std::shared_ptr<PostProcessor> parsePostProcessor(
+std::shared_ptr<post_processors::PostProcessor> parsePostProcessor(
     simdjson::ondemand::value& config) {
   if (config.is_null())
     return nullptr;
@@ -75,7 +78,7 @@ std::shared_ptr<PostProcessor> parsePostProcessor(
   if (type != "TemplateProcessing")
     return nullptr;
 
-  std::vector<TemplateProcessor> single;
+  std::vector<post_processors::TemplateProcessor> single;
   if (auto single_result = config["single"].get_array();
       single_result.error() == simdjson::SUCCESS) {
     for (auto element : single_result) {
@@ -85,12 +88,13 @@ std::shared_ptr<PostProcessor> parsePostProcessor(
         int type_id =
             static_cast<int>(static_cast<int64_t>(item_object["type_id"]));
         std::string id = std::string(item_object["id"].get_string().value());
-        single.emplace_back(TemplateProcessor(category, type_id, id));
+        single.emplace_back(
+            post_processors::TemplateProcessor(category, type_id, id));
       }
     }
   }
 
-  std::vector<TemplateProcessor> pair;
+  std::vector<post_processors::TemplateProcessor> pair;
   if (auto pair_result = config["pair"].get_array();
       pair_result.error() == simdjson::SUCCESS) {
     for (auto element : pair_result) {
@@ -100,7 +104,8 @@ std::shared_ptr<PostProcessor> parsePostProcessor(
         int type_id =
             static_cast<int>(static_cast<int64_t>(item_object["type_id"]));
         std::string id = std::string(item_object["id"].get_string().value());
-        pair.emplace_back(TemplateProcessor(category, type_id, id));
+        pair.emplace_back(
+            post_processors::TemplateProcessor(category, type_id, id));
       }
     }
   }
@@ -116,7 +121,8 @@ std::shared_ptr<PostProcessor> parsePostProcessor(
     special_tokens[key] = value;
   }
 
-  return std::make_shared<TemplateProcessing>(single, pair, special_tokens);
+  return std::make_shared<post_processors::TemplateProcessing>(single, pair,
+                                                               special_tokens);
 }
 
 Tokenizer::Tokenizer() : version("") {}
@@ -219,13 +225,15 @@ std::string Tokenizer::Decode(const std::vector<int>& ids,
 
 Encoding Tokenizer::EncodeSingleSequence(icu::UnicodeString* unicode_input,
                                          int type_id, bool add_special_tokens) {
-  NormalizerResult normalized = NormalizerResult(*unicode_input);
+  normalizers::NormalizerResult normalized =
+      normalizers::NormalizerResult(*unicode_input);
   if (normalizer.get() != nullptr) {
     normalized = normalizer->Normalize(normalized);
   }
-  PreTokenizerResult pre_tokenized = PreTokenizerResult(
-      {normalized.normalized},
-      std::vector<std::vector<std::pair<int, int>>>({normalized.offsets}));
+  pre_tokenizers::PreTokenizerResult pre_tokenized =
+      pre_tokenizers::PreTokenizerResult(
+          {normalized.normalized},
+          std::vector<std::vector<std::pair<int, int>>>({normalized.offsets}));
   if (pre_tokenizer.get() != nullptr) {
     pre_tokenized = pre_tokenizer->PreTokenize(pre_tokenized);
   }
@@ -249,3 +257,5 @@ Encoding Tokenizer::EncodeSingleSequence(icu::UnicodeString* unicode_input,
   }
   return encoding;
 }
+
+} // namespace tokenizers

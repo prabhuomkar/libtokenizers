@@ -8,6 +8,10 @@
 
 #include "tokenizers/common.h"
 
+namespace tokenizers {
+
+namespace post_processors {
+
 PostProcessor::PostProcessor() {}
 
 std::vector<Encoding> PostProcessor::ProcessEncodings(
@@ -51,3 +55,7 @@ std::vector<Encoding> TemplateProcessing::ProcessEncodings(
   }
   return result;
 }
+
+} // namespace post_processors
+
+} // namespace tokenizers

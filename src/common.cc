@@ -5,6 +5,8 @@
 #include <utility>
 #include <vector>
 
+namespace tokenizers {
+
 Encoding::Encoding()
     : ids({}),
       type_ids({}),
@@ -39,3 +41,5 @@ Token::Token(const std::string& value, int id,
       id(id),
       offsets(offsets),
       is_continuing_subword(is_continuing_subword) {}
+
+} // namespace tokenizers

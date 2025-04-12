@@ -7,6 +7,8 @@
 
 #include "tokenizers/common.h"
 
+namespace tokenizers {
+
 enum class TruncationDirection { kLeft, kRight };
 
 enum class TruncationStrategy { kLongestFirst, kOnlyFirst, kOnlySecond };
@@ -54,3 +56,5 @@ class Padding {
 void PadEncoding(Encoding *encoding, int target_length, int pad_id,
                  int pad_type_id, const std::string &pad_token,
                  PaddingDirection direction);
+
+} // namespace tokenizers

@@ -9,6 +9,8 @@
 
 #include "tokenizers/common.h"
 
+namespace tokenizers {
+
 Truncation::Truncation()
     : direction_(TruncationDirection::kRight),
       strategy_(TruncationStrategy::kLongestFirst),
@@ -255,3 +257,5 @@ std::vector<Encoding> Padding::PadEncodings(
 
   return result;
 }
+
+} // namespace tokenizers

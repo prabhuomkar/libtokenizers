@@ -16,6 +16,14 @@
 #include "tokenizers/normalizer.h"
 #include "tokenizers/pre_tokenizer.h"
 
+using tokenizers::Encoding;
+using tokenizers::Tokenizer;
+using tokenizers::models::WordPiece;
+using tokenizers::normalizers::BertNormalizer;
+using tokenizers::post_processors::TemplateProcessing;
+using tokenizers::post_processors::TemplateProcessor;
+using tokenizers::pre_tokenizers::BertPreTokenizer;
+
 std::string read_json_for_test(const std::string& filepath) {
   std::ifstream file(filepath);
   std::ostringstream buffer;

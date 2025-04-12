@@ -5,6 +5,13 @@
 
 #include <string>
 
+using tokenizers::normalizers::BertNormalizer;
+using tokenizers::normalizers::isChineseChar;
+using tokenizers::normalizers::isControl;
+using tokenizers::normalizers::isWhitespace;
+using tokenizers::normalizers::Normalizer;
+using tokenizers::normalizers::NormalizerResult;
+
 void assertNormalizerValues(const NormalizerResult& got,
                             const NormalizerResult& expected) {
   std::string got_str, expected_str;

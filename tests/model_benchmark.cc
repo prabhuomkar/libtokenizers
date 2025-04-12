@@ -8,6 +8,10 @@
 #include "tokenizers/common.h"
 #include "tokenizers/model.h"
 
+using tokenizers::Token;
+using tokenizers::models::Model;
+using tokenizers::models::WordPiece;
+
 static void BM_WordPieceModelIsBad(benchmark::State& state) { // NOLINT
   WordPiece model = WordPiece({{u8"[UNK]", 1}}, u8"[UNK]", u8"##", 100);
   icu::UnicodeString input =

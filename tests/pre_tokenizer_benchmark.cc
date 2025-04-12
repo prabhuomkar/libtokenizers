@@ -8,6 +8,11 @@
 
 #include "tokenizers/pre_tokenizer.h"
 
+using tokenizers::pre_tokenizers::BertPreTokenizer;
+using tokenizers::pre_tokenizers::PreTokenizer;
+using tokenizers::pre_tokenizers::PreTokenizerResult;
+using tokenizers::pre_tokenizers::SplitDelimiterBehavior;
+
 static void BM_PreTokenizerSplitRemoved(benchmark::State& state) { // NOLINT
   PreTokenizerResult input = PreTokenizerResult(
       icu::UnicodeString::fromUTF8(u8"the-final--countdown"));

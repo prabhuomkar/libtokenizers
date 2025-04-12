@@ -6,6 +6,13 @@
 
 #include "tokenizers/normalizer.h"
 
+using tokenizers::normalizers::BertNormalizer;
+using tokenizers::normalizers::isChineseChar;
+using tokenizers::normalizers::isControl;
+using tokenizers::normalizers::isWhitespace;
+using tokenizers::normalizers::Normalizer;
+using tokenizers::normalizers::NormalizerResult;
+
 static void BM_BertNormalizerNoOp(benchmark::State& state) { // NOLINT
   NormalizerResult input =
       NormalizerResult(icu::UnicodeString::fromUTF8(u8"Hello, World!"));

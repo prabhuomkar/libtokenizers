@@ -7,6 +7,11 @@
 
 #include "tokenizers/post_processor.h"
 
+using tokenizers::Encoding;
+using tokenizers::post_processors::PostProcessor;
+using tokenizers::post_processors::TemplateProcessing;
+using tokenizers::post_processors::TemplateProcessor;
+
 static void BM_TemplateProcessorSingle(benchmark::State& state) { // NOLINT
   TemplateProcessing post_processor(
       {TemplateProcessor("SpecialToken", 0, "[CLS]"),

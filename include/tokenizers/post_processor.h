@@ -8,6 +8,10 @@
 
 #include "tokenizers/common.h"
 
+namespace tokenizers {
+
+namespace post_processors {
+
 class PostProcessor {
  public:
   PostProcessor();
@@ -44,3 +48,7 @@ class TemplateProcessing : public PostProcessor {
   std::vector<TemplateProcessor> pair_;
   std::unordered_map<std::string, int> special_tokens_;
 };
+
+} // namespace post_processors
+
+} // namespace tokenizers

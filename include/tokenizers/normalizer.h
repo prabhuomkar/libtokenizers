@@ -8,6 +8,10 @@
 #include <utility>
 #include <vector>
 
+namespace tokenizers {
+
+namespace normalizers {
+
 class NormalizerResult {
  public:
   explicit NormalizerResult(const icu::UnicodeString& normalized);
@@ -56,3 +60,7 @@ bool isControl(UChar32 c);
 bool isWhitespace(UChar32 c);
 
 bool isChineseChar(UChar32 c);
+
+} // namespace normalizers
+
+} // namespace tokenizers

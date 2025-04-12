@@ -10,6 +10,10 @@
 
 #include "tokenizers/common.h"
 
+namespace tokenizers {
+
+namespace models {
+
 class Model {
  public:
   Model();
@@ -39,3 +43,7 @@ class WordPiece : public Model {
   std::string continuing_subword_prefix_;
   int max_input_chars_per_word_;
 };
+
+} // namespace models
+
+} // namespace tokenizers

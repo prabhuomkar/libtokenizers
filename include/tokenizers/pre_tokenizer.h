@@ -9,6 +9,10 @@
 #include <utility>
 #include <vector>
 
+namespace tokenizers {
+
+namespace pre_tokenizers {
+
 class PreTokenizerResult {
  public:
   PreTokenizerResult();
@@ -50,3 +54,7 @@ class BertPreTokenizer : public PreTokenizer {
   std::vector<std::pair<std::string, std::pair<int, int>>> PreTokenizeString(
       const std::string& input) override;
 };
+
+} // namespace pre_tokenizers
+
+} // namespace tokenizers

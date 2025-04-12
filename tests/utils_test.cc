@@ -9,6 +9,16 @@
 
 #include "tokenizers/common.h"
 
+using tokenizers::Encoding;
+using tokenizers::Padding;
+using tokenizers::PaddingDirection;
+using tokenizers::PaddingStrategy;
+using tokenizers::PadEncoding;
+using tokenizers::TruncateEncoding;
+using tokenizers::Truncation;
+using tokenizers::TruncationDirection;
+using tokenizers::TruncationStrategy;
+
 void assertUtilsValues(std::vector<Encoding> got,
                        std::vector<Encoding> expected) {
   ASSERT_EQ(got.size(), expected.size());

@@ -12,6 +12,14 @@
 
 #include "tokenizers/tokenizer.h"
 
+using tokenizers::Encoding;
+using tokenizers::Tokenizer;
+using tokenizers::models::WordPiece;
+using tokenizers::normalizers::BertNormalizer;
+using tokenizers::post_processors::TemplateProcessing;
+using tokenizers::post_processors::TemplateProcessor;
+using tokenizers::pre_tokenizers::BertPreTokenizer;
+
 std::string read_json_for_benchmark(const std::string& filepath) {
   std::ifstream file(filepath);
   std::ostringstream buffer;
