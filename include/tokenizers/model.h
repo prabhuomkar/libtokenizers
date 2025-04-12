@@ -21,8 +21,6 @@ class Model {
                                       const std::pair<int, int>& offset);
   virtual std::vector<Token> Tokenize(const icu::UnicodeString& input);
   virtual std::vector<Token> TokenizeString(const std::string& input);
-
- private:
 };
 
 // WordPiece

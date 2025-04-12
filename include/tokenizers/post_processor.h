@@ -17,8 +17,6 @@ class PostProcessor {
   PostProcessor();
   virtual std::vector<Encoding> ProcessEncodings(
       const std::vector<Encoding>& encodings);
-
- private:
 };
 
 class TemplateProcessor {
