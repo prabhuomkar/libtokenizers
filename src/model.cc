@@ -28,6 +28,12 @@ std::vector<Token> Model::TokenizeString(const std::string& input) {
   return {};
 }
 
+std::optional<std::string> Model::IdToToken(int id) { return std::nullopt; }
+
+std::optional<int> Model::TokenToId(const std::string& token) {
+  return std::nullopt;
+}
+
 WordPiece::WordPiece(const std::unordered_map<std::string, int>& vocab,
                      const std::string& unk_token,
                      const std::string& continuing_subword_prefix,
@@ -35,7 +41,11 @@ WordPiece::WordPiece(const std::unordered_map<std::string, int>& vocab,
     : vocab_(vocab),
       unk_token_(unk_token),
       continuing_subword_prefix_(continuing_subword_prefix),
-      max_input_chars_per_word_(max_input_chars_per_word) {}
+      max_input_chars_per_word_(max_input_chars_per_word) {
+  for (const auto& pair : vocab_) {
+    rvocab_[pair.second] = pair.first;
+  }
+}
 
 std::vector<Token> WordPiece::Tokenize(const icu::UnicodeString& input,
                                        const std::pair<int, int>& offset) {
@@ -94,6 +104,22 @@ std::vector<Token> WordPiece::Tokenize(const icu::UnicodeString& input) {
 std::vector<Token> WordPiece::TokenizeString(const std::string& input) {
   icu::UnicodeString unicode_input = icu::UnicodeString::fromUTF8(input);
   return Tokenize(unicode_input);
+}
+
+std::optional<std::string> WordPiece::IdToToken(int id) {
+  auto it = rvocab_.find(id);
+  if (it != rvocab_.end()) {
+    return it->second;
+  }
+  return std::nullopt;
+}
+
+std::optional<int> WordPiece::TokenToId(const std::string& token) {
+  auto it = vocab_.find(token);
+  if (it != vocab_.end()) {
+    return it->second;
+  }
+  return std::nullopt;
 }
 
 } // namespace models

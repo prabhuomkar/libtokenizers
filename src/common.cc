@@ -42,4 +42,24 @@ Token::Token(const std::string& value, int id,
       offsets(offsets),
       is_continuing_subword(is_continuing_subword) {}
 
+AddedToken::AddedToken()
+    : id(0),
+      content(""),
+      single_word(false),
+      lstrip(false),
+      rstrip(false),
+      normalized(false),
+      special_token(false) {}
+
+AddedToken::AddedToken(int id, const std::string& content, bool single_word,
+                       bool lstrip, bool rstrip, bool normalized,
+                       bool special_token)
+    : id(id),
+      content(content),
+      single_word(single_word),
+      lstrip(lstrip),
+      rstrip(rstrip),
+      normalized(normalized),
+      special_token(special_token) {}
+
 } // namespace tokenizers

@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "tokenizers/common.h"
+#include "tokenizers/decoder.h"
 #include "tokenizers/model.h"
 #include "tokenizers/normalizer.h"
 #include "tokenizers/post_processor.h"
@@ -20,6 +21,8 @@
 namespace tokenizers {
 
 std::string parseVersion(simdjson::ondemand::document &config);
+std::shared_ptr<std::vector<AddedToken>> parseAddedTokens(
+    simdjson::ondemand::value &config);
 std::shared_ptr<tokenizers::normalizers::Normalizer> parseNormalizer(
     simdjson::ondemand::value &config);
 std::shared_ptr<tokenizers::pre_tokenizers::PreTokenizer> parsePreTokenizer(
@@ -27,6 +30,8 @@ std::shared_ptr<tokenizers::pre_tokenizers::PreTokenizer> parsePreTokenizer(
 std::shared_ptr<tokenizers::models::Model> parseModel(
     simdjson::ondemand::value &config);
 std::shared_ptr<tokenizers::post_processors::PostProcessor> parsePostProcessor(
+    simdjson::ondemand::value &config);
+std::shared_ptr<tokenizers::decoders::Decoder> parseDecoder(
     simdjson::ondemand::value &config);
 
 class Tokenizer {
@@ -40,11 +45,14 @@ class Tokenizer {
   std::string Decode(const std::vector<int> &ids,
                      bool skip_special_tokens = true);
 
+  std::shared_ptr<std::vector<AddedToken>> added_tokens;
   std::shared_ptr<tokenizers::normalizers::Normalizer> normalizer;
   std::shared_ptr<tokenizers::pre_tokenizers::PreTokenizer> pre_tokenizer;
   std::shared_ptr<tokenizers::models::Model> model;
   std::shared_ptr<tokenizers::post_processors::PostProcessor> post_processor;
+  std::shared_ptr<tokenizers::decoders::Decoder> decoder;
   std::shared_ptr<Truncation> truncation;
+  std::unordered_map<std::string, int> special_tokens;
   std::shared_ptr<Padding> padding;
   std::string version;
 

@@ -44,6 +44,21 @@ class Token {
   bool is_continuing_subword;
 };
 
+class AddedToken {
+ public:
+  AddedToken();
+  AddedToken(int id, const std::string &content, bool single_word,
+             bool lstrip = false, bool rstrip = false, bool normalized = false,
+             bool special_token = true);
+  int id;
+  std::string content;
+  bool single_word;
+  bool lstrip;
+  bool rstrip;
+  bool normalized;
+  bool special_token;
+};
+
 inline std::string get_string_or_default(simdjson::ondemand::value &&val,
                                          std::string_view key,
                                          std::string_view def = "") {
