@@ -12,6 +12,7 @@ find_package(ICU REQUIRED COMPONENTS uc i18n data)
 add_subdirectory(third_party/simdjson)
 
 set(SOURCES
+  src/added_vocabulary.cc
   src/common.cc
   src/decoder.cc
   src/model.cc

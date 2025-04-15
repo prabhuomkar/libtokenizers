@@ -224,8 +224,10 @@ TEST(TokenizerTest, DecodeSingle) {
           TemplateProcessor("SpecialToken", 1, "[SEP]"),
       }),
       std::unordered_map<std::string, int>({{"[CLS]", 100}, {"[SEP]", 101}}));
-  tokenizer.special_tokens =
-      std::unordered_map<std::string, int>({{"[CLS]", 100}, {"[SEP]", 101}});
+  tokenizer.added_vocabulary = std::make_shared<tokenizers::AddedVocabulary>(
+      std::vector<tokenizers::AddedToken>(
+          {tokenizers::AddedToken(100, "[CLS]", true, false, false, true),
+           tokenizers::AddedToken(101, "[SEP]", true, false, false, true)}));
   tokenizer.decoder = std::make_shared<WordPieceDecoder>();
   std::string expected_result =
       "hello world! i ' m learning bert - based nlp with unaffordable costs "
@@ -267,8 +269,10 @@ TEST(TokenizerTest, DecodePair) {
           TemplateProcessor("SpecialToken", 1, "[SEP]"),
       }),
       std::unordered_map<std::string, int>({{"[CLS]", 100}, {"[SEP]", 101}}));
-  tokenizer.special_tokens =
-      std::unordered_map<std::string, int>({{"[CLS]", 100}, {"[SEP]", 101}});
+  tokenizer.added_vocabulary = std::make_shared<tokenizers::AddedVocabulary>(
+      std::vector<tokenizers::AddedToken>(
+          {tokenizers::AddedToken(100, "[CLS]", true, false, false, true),
+           tokenizers::AddedToken(101, "[SEP]", true, false, false, true)}));
   tokenizer.decoder = std::make_shared<WordPieceDecoder>();
   std::string expected_result =
       "hello world! i ' m learning bert - based nlp. we have unaffordable "

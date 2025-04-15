@@ -21,14 +21,15 @@ std::string parseVersion(simdjson::ondemand::document& config) {
              : "";
 }
 
-std::shared_ptr<std::vector<AddedToken>> parseAddedTokens(
+std::shared_ptr<AddedVocabulary> parseAddedVocabulary(
     simdjson::ondemand::value& config) {
   if (config.is_null())
     return nullptr;
 
+  std::vector<AddedToken> added_tokens;
+
   auto added_tokens_result = config.get_array();
   if (added_tokens_result.error() == simdjson::SUCCESS) {
-    auto added_tokens = std::make_shared<std::vector<AddedToken>>();
     for (auto element : added_tokens_result) {
       int id = get_int64_or_default(std::move(element), "id");
       std::string content =
@@ -41,10 +42,10 @@ std::shared_ptr<std::vector<AddedToken>> parseAddedTokens(
           get_bool_or_default(std::move(element), "normalized", false);
       bool special_token =
           get_bool_or_default(std::move(element), "special_token", true);
-      added_tokens->emplace_back(id, content, single_word, lstrip, rstrip,
-                                 normalized, special_token);
+      added_tokens.emplace_back(id, content, single_word, lstrip, rstrip,
+                                normalized, special_token);
     }
-    return added_tokens;
+    return std::make_shared<AddedVocabulary>(added_tokens);
   }
 
   return nullptr;
@@ -190,10 +191,7 @@ Tokenizer::Tokenizer(const std::string& json_config) {
   simdjson::ondemand::document config = parser.iterate(padded_config);
   version = parseVersion(config);
   simdjson::ondemand::value added_tokens_config = config["added_tokens"];
-  added_tokens = parseAddedTokens(added_tokens_config);
-  for (const AddedToken& token : *added_tokens) {
-    special_tokens[token.content] = token.id;
-  }
+  added_vocabulary = parseAddedVocabulary(added_tokens_config);
   simdjson::ondemand::value normalizer_config = config["normalizer"];
   normalizer = parseNormalizer(normalizer_config);
   simdjson::ondemand::value pre_tokenizer_config = config["pre_tokenizer"];
@@ -286,7 +284,7 @@ std::string Tokenizer::Decode(const std::vector<int>& ids,
     if (!opt_token.has_value())
       continue;
     if (!skip_special_tokens ||
-        special_tokens.find(opt_token.value()) == special_tokens.end()) {
+        !added_vocabulary->IsSpecialToken(opt_token.value())) {
       tokens.emplace_back(opt_token.value());
     }
   }

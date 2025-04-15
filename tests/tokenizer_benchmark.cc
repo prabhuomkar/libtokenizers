@@ -160,8 +160,10 @@ static void BM_TokenizerDecodeSingle(benchmark::State& state) { // NOLINT
           TemplateProcessor("SpecialToken", 1, "[SEP]"),
       }),
       std::unordered_map<std::string, int>({{"[CLS]", 100}, {"[SEP]", 101}}));
-  tokenizer.special_tokens =
-      std::unordered_map<std::string, int>({{"[CLS]", 100}, {"[SEP]", 101}});
+  tokenizer.added_vocabulary = std::make_shared<tokenizers::AddedVocabulary>(
+      std::vector<tokenizers::AddedToken>(
+          {tokenizers::AddedToken(100, "[CLS]", true, false, false, true),
+           tokenizers::AddedToken(101, "[SEP]", true, false, false, true)}));
   tokenizer.decoder =
       std::make_shared<tokenizers::decoders::WordPieceDecoder>();
   std::vector<int> input = {100, 1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12,
@@ -203,8 +205,10 @@ static void BM_TokenizerDecodePair(benchmark::State& state) { // NOLINT
           TemplateProcessor("SpecialToken", 1, "[SEP]"),
       }),
       std::unordered_map<std::string, int>({{"[CLS]", 100}, {"[SEP]", 101}}));
-  tokenizer.special_tokens =
-      std::unordered_map<std::string, int>({{"[CLS]", 100}, {"[SEP]", 101}});
+  tokenizer.added_vocabulary = std::make_shared<tokenizers::AddedVocabulary>(
+      std::vector<tokenizers::AddedToken>(
+          {tokenizers::AddedToken(100, "[CLS]", true, false, false, true),
+           tokenizers::AddedToken(101, "[SEP]", true, false, false, true)}));
   tokenizer.decoder =
       std::make_shared<tokenizers::decoders::WordPieceDecoder>();
   std::vector<int> input = {100, 1,  2,  3,   4,  5,  6,  7,  8,  9,
