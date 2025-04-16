@@ -20,7 +20,7 @@ PreTokenizerResult::PreTokenizerResult() : pre_tokenized({}), offsets({}) {}
 
 PreTokenizerResult::PreTokenizerResult(const icu::UnicodeString& pre_tokenized)
     : pre_tokenized({pre_tokenized}) {
-  char_offsets.reserve(1);
+  char_offsets = {{}};
   icu::StringCharacterIterator it(pre_tokenized);
   for (it.first(); it.hasNext();) {
     int start = it.getIndex();
@@ -62,7 +62,7 @@ PreTokenizerResult split(const PreTokenizerResult& input,
   for (int i = 0; i < input.pre_tokenized.size(); i++) {
     const icu::UnicodeString& token = input.pre_tokenized[i];
     const std::pair<int, int>& token_offset = input.offsets[i];
-    const std::vector<std::pair<int, int>>& char_offsets =
+    const std::vector<std::pair<int, int>>& token_char_offsets =
         input.char_offsets[i];
     icu::UnicodeString current;
     icu::StringCharacterIterator it(token);
@@ -76,12 +76,13 @@ PreTokenizerResult split(const PreTokenizerResult& input,
           case SplitDelimiterBehavior::kRemoved:
             if (!current.isEmpty()) {
               result.pre_tokenized.emplace_back(current);
-              result.offsets.emplace_back(char_offsets[token_idx].first,
-                                          char_offsets[char_start - 1].second);
+              result.offsets.emplace_back(
+                  token_char_offsets[token_idx].first,
+                  token_char_offsets[char_start - 1].second);
               std::vector<std::pair<int, int>> current_char_offsets;
               for (int j = token_idx; j < char_start; j++) {
-                current_char_offsets.emplace_back(char_offsets[j].first,
-                                                  char_offsets[j].second);
+                current_char_offsets.emplace_back(token_char_offsets[j].first,
+                                                  token_char_offsets[j].second);
               }
               result.char_offsets.emplace_back(current_char_offsets);
               current.remove();
@@ -91,24 +92,26 @@ PreTokenizerResult split(const PreTokenizerResult& input,
           case SplitDelimiterBehavior::kIsolated:
             if (!current.isEmpty()) {
               result.pre_tokenized.emplace_back(current);
-              result.offsets.emplace_back(char_offsets[token_idx].first,
-                                          char_offsets[char_start - 1].second);
+              result.offsets.emplace_back(
+                  token_char_offsets[token_idx].first,
+                  token_char_offsets[char_start - 1].second);
               std::vector<std::pair<int, int>> current_char_offsets;
               for (int j = token_idx; j < char_start; j++) {
-                current_char_offsets.emplace_back(char_offsets[j].first,
-                                                  char_offsets[j].second);
+                current_char_offsets.emplace_back(token_char_offsets[j].first,
+                                                  token_char_offsets[j].second);
               }
               result.char_offsets.emplace_back(current_char_offsets);
               current.remove();
             }
             result.pre_tokenized.emplace_back(icu::UnicodeString(c));
-            result.offsets.emplace_back(char_offsets[char_start].first,
-                                        char_offsets[char_end - 1].second);
+            result.offsets.emplace_back(
+                token_char_offsets[char_start].first,
+                token_char_offsets[char_end - 1].second);
             {
               std::vector<std::pair<int, int>> append_char_offsets;
               for (int j = char_start; j < char_end; j++) {
-                append_char_offsets.emplace_back(char_offsets[j].first,
-                                                 char_offsets[j].second);
+                append_char_offsets.emplace_back(token_char_offsets[j].first,
+                                                 token_char_offsets[j].second);
               }
               result.char_offsets.emplace_back(append_char_offsets);
             }
@@ -117,13 +120,14 @@ PreTokenizerResult split(const PreTokenizerResult& input,
           case SplitDelimiterBehavior::kMergedWithPrevious:
             current.append(c);
             result.pre_tokenized.emplace_back(current);
-            result.offsets.emplace_back(char_offsets[token_idx].first,
-                                        char_offsets[char_end - 1].second);
+            result.offsets.emplace_back(
+                token_char_offsets[token_idx].first,
+                token_char_offsets[char_end - 1].second);
             {
               std::vector<std::pair<int, int>> current_char_offsets;
               for (int j = token_idx; j < char_end; j++) {
-                current_char_offsets.emplace_back(char_offsets[j].first,
-                                                  char_offsets[j].second);
+                current_char_offsets.emplace_back(token_char_offsets[j].first,
+                                                  token_char_offsets[j].second);
               }
               result.char_offsets.emplace_back(current_char_offsets);
             }
@@ -133,12 +137,13 @@ PreTokenizerResult split(const PreTokenizerResult& input,
           case SplitDelimiterBehavior::kMergedWithNext:
             if (!current.isEmpty()) {
               result.pre_tokenized.emplace_back(current);
-              result.offsets.emplace_back(char_offsets[token_idx].first,
-                                          char_offsets[char_start - 1].second);
+              result.offsets.emplace_back(
+                  token_char_offsets[token_idx].first,
+                  token_char_offsets[char_start - 1].second);
               std::vector<std::pair<int, int>> current_char_offsets;
               for (int j = token_idx; j < char_start; j++) {
-                current_char_offsets.emplace_back(char_offsets[j].first,
-                                                  char_offsets[j].second);
+                current_char_offsets.emplace_back(token_char_offsets[j].first,
+                                                  token_char_offsets[j].second);
               }
               current.remove();
             }
@@ -152,12 +157,12 @@ PreTokenizerResult split(const PreTokenizerResult& input,
     }
     if (!current.isEmpty()) {
       result.pre_tokenized.emplace_back(current);
-      result.offsets.emplace_back(char_offsets[token_idx].first,
-                                  char_offsets.back().second);
+      result.offsets.emplace_back(token_char_offsets[token_idx].first,
+                                  token_char_offsets.back().second);
       std::vector<std::pair<int, int>> current_char_offsets;
-      for (int j = token_idx; j < char_offsets.size(); j++) {
-        current_char_offsets.emplace_back(char_offsets[j].first,
-                                          char_offsets[j].second);
+      for (int j = token_idx; j < token_char_offsets.size(); j++) {
+        current_char_offsets.emplace_back(token_char_offsets[j].first,
+                                          token_char_offsets[j].second);
       }
       result.char_offsets.emplace_back(current_char_offsets);
     }

@@ -4,12 +4,21 @@ project(tokenizers VERSION 1.0.0)
 
 set(CMAKE_CXX_STANDARD 17)
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+  set(ICU_ROOT "/opt/homebrew/opt/icu4c")
+  set(ICU_INCLUDE_DIRS "${ICU_ROOT}/include")
+  set(ICU_LIBRARIES "${ICU_ROOT}/lib")
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  set(ICU_INCLUDE_DIRS "/usr/include")
+  set(ICU_LIBRARIES "/usr/lib")
+endif()
 set(ICU_ROOT /opt/homebrew/opt/icu4c)
 set(ICU_INCLUDE_DIRS ${ICU_ROOT}/include)
 set(ICU_LIBRARIES ${ICU_ROOT}/lib)
 find_package(ICU REQUIRED COMPONENTS uc i18n data)
 
 add_subdirectory(third_party/simdjson)
+set_target_properties(simdjson PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 set(SOURCES
   src/added_vocabulary.cc

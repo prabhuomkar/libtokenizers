@@ -286,7 +286,7 @@ TEST(TokenizerTest, DecodePair) {
 
 TEST(TokenizerTest, InitFromConfig) {
   std::string config =
-      read_json_for_test("../scripts/tokenizers/bert-base-uncased.json");
+      read_json_for_test("../../scripts/tokenizers/bert-base-uncased.json");
   Tokenizer tokenizer(config);
   ASSERT_EQ(tokenizer.version, "1.0");
   ASSERT_TRUE(tokenizer.normalizer != nullptr);
@@ -310,7 +310,7 @@ TEST(TokenizerTest, InitFromConfig) {
 
 TEST(TokenizerTest, EncodeSingleFromConfigAddSpecialTokens) {
   std::string config =
-      read_json_for_test("../scripts/tokenizers/bert-base-uncased.json");
+      read_json_for_test("../../scripts/tokenizers/bert-base-uncased.json");
   Tokenizer tokenizer = Tokenizer(config);
   Encoding expected_encoding = Encoding(
       {101,  7592,  2088, 999,  1045,  1005, 1049, 4083, 14324, 1011,
@@ -348,7 +348,7 @@ TEST(TokenizerTest, EncodeSingleFromConfigAddSpecialTokens) {
 
 TEST(TokenizerTest, EncodePairFromConfigAddSpecialTokens) {
   std::string config =
-      read_json_for_test("../scripts/tokenizers/bert-base-uncased.json");
+      read_json_for_test("../../scripts/tokenizers/bert-base-uncased.json");
   Tokenizer tokenizer = Tokenizer(config);
   Encoding expected_encoding = Encoding(
       {101,   7592, 2088, 999,  1045, 1005, 1049,  4083, 14324, 1011, 2241,
@@ -425,7 +425,7 @@ TEST(TokenizerTest, EncodePairFromConfigAddSpecialTokens) {
 
 TEST(TokenizerTest, EncodeSingleFromConfigNoSpecialTokens) {
   std::string config =
-      read_json_for_test("../scripts/tokenizers/bert-base-uncased.json");
+      read_json_for_test("../../scripts/tokenizers/bert-base-uncased.json");
   Tokenizer tokenizer = Tokenizer(config);
   Encoding expected_encoding = Encoding(
       {7592,  2088, 999,  1045,  1005, 1049, 4083, 14324, 1011,  2241,
@@ -463,7 +463,7 @@ TEST(TokenizerTest, EncodeSingleFromConfigNoSpecialTokens) {
 
 TEST(TokenizerTest, EncodePairFromConfigNoSpecialTokens) {
   std::string config =
-      read_json_for_test("../scripts/tokenizers/bert-base-uncased.json");
+      read_json_for_test("../../scripts/tokenizers/bert-base-uncased.json");
   Tokenizer tokenizer = Tokenizer(config);
   Encoding expected_encoding = Encoding(
       {7592,  2088, 999,  1045, 1005, 1049,  4083, 14324, 1011, 2241,
@@ -500,7 +500,7 @@ TEST(TokenizerTest, EncodePairFromConfigNoSpecialTokens) {
 
 TEST(TokenizerTest, DecodeSingleFromConfigSkipSpecialTokens) {
   std::string config =
-      read_json_for_test("../scripts/tokenizers/bert-base-uncased.json");
+      read_json_for_test("../../scripts/tokenizers/bert-base-uncased.json");
   Tokenizer tokenizer = Tokenizer(config);
   std::string expected_result =
       "hello world! i ' m learning bert - based nlp with unaffordable costs in "
@@ -515,7 +515,7 @@ TEST(TokenizerTest, DecodeSingleFromConfigSkipSpecialTokens) {
 
 TEST(TokenizerTest, DecodePairFromConfigSkipSpecialTokens) {
   std::string config =
-      read_json_for_test("../scripts/tokenizers/bert-base-uncased.json");
+      read_json_for_test("../../scripts/tokenizers/bert-base-uncased.json");
   Tokenizer tokenizer = Tokenizer(config);
   std::string expected_result =
       "hello world! i ' m learning bert - based nlp. we have unaffordable "
@@ -530,7 +530,7 @@ TEST(TokenizerTest, DecodePairFromConfigSkipSpecialTokens) {
 
 TEST(TokenizerTest, DecodeSingleFromConfigIncludeSpecialTokens) {
   std::string config =
-      read_json_for_test("../scripts/tokenizers/bert-base-uncased.json");
+      read_json_for_test("../../scripts/tokenizers/bert-base-uncased.json");
   Tokenizer tokenizer = Tokenizer(config);
   std::string expected_result =
       "[CLS] hello world! i ' m learning bert - based nlp with unaffordable "
@@ -548,7 +548,7 @@ TEST(TokenizerTest, DecodeSingleFromConfigIncludeSpecialTokens) {
 
 TEST(TokenizerTest, DecodePairFromConfigIncludeSpecialTokens) {
   std::string config =
-      read_json_for_test("../scripts/tokenizers/bert-base-uncased.json");
+      read_json_for_test("../../scripts/tokenizers/bert-base-uncased.json");
   Tokenizer tokenizer = Tokenizer(config);
   std::string expected_result =
       "[CLS] hello world! i ' m learning bert - based nlp. [SEP] we have "

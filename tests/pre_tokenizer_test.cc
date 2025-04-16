@@ -30,7 +30,7 @@ void assertPreTokenizerValues(const PreTokenizerResult& got,
 TEST(PreTokenizerTest, SplitRemoved) {
   PreTokenizerResult input = PreTokenizerResult(
       icu::UnicodeString::fromUTF8(u8"the-final--countdown"));
-  PreTokenizerResult result = split(
+  PreTokenizerResult result = tokenizers::pre_tokenizers::split(
       input, [](UChar32 c) { return c == '-'; },
       SplitDelimiterBehavior::kRemoved);
   PreTokenizerResult expected =
@@ -44,7 +44,7 @@ TEST(PreTokenizerTest, SplitRemoved) {
 TEST(PreTokenizerTest, SplitIsolated) {
   PreTokenizerResult input = PreTokenizerResult(
       icu::UnicodeString::fromUTF8(u8"the-final--countdown"));
-  PreTokenizerResult result = split(
+  PreTokenizerResult result = tokenizers::pre_tokenizers::split(
       input, [](UChar32 c) { return c == '-'; },
       SplitDelimiterBehavior::kIsolated);
   PreTokenizerResult expected = PreTokenizerResult(
@@ -60,7 +60,7 @@ TEST(PreTokenizerTest, SplitIsolated) {
 TEST(PreTokenizerTest, SplitMergedWithPrevious) {
   PreTokenizerResult input = PreTokenizerResult(
       icu::UnicodeString::fromUTF8(u8"the-final--countdown"));
-  PreTokenizerResult result = split(
+  PreTokenizerResult result = tokenizers::pre_tokenizers::split(
       input, [](UChar32 c) { return c == '-'; },
       SplitDelimiterBehavior::kMergedWithPrevious);
   PreTokenizerResult expected =
@@ -75,7 +75,7 @@ TEST(PreTokenizerTest, SplitMergedWithPrevious) {
 TEST(PreTokenizerTest, SplitMergedWithNext) {
   PreTokenizerResult input = PreTokenizerResult(
       icu::UnicodeString::fromUTF8(u8"the-final--countdown"));
-  PreTokenizerResult result = split(
+  PreTokenizerResult result = tokenizers::pre_tokenizers::split(
       input, [](UChar32 c) { return c == '-'; },
       SplitDelimiterBehavior::kMergedWithNext);
   PreTokenizerResult expected =

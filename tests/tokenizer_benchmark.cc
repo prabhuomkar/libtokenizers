@@ -222,8 +222,8 @@ static void BM_TokenizerDecodePair(benchmark::State& state) { // NOLINT
 }
 
 static void BM_TokenizerInitFromConfig(benchmark::State& state) { // NOLINT
-  std::string config =
-      read_json_for_benchmark("../scripts/tokenizers/bert-base-uncased.json");
+  std::string config = read_json_for_benchmark(
+      "../../scripts/tokenizers/bert-base-uncased.json");
   for (auto _ : state) {
     Tokenizer tokenizer = Tokenizer(config);
     benchmark::DoNotOptimize(tokenizer);
@@ -232,8 +232,8 @@ static void BM_TokenizerInitFromConfig(benchmark::State& state) { // NOLINT
 
 static void BM_TokenizerEncodeSingleFromConfigAddSpecialTokens(
     benchmark::State& state) { // NOLINT
-  std::string config =
-      read_json_for_benchmark("../scripts/tokenizers/bert-base-uncased.json");
+  std::string config = read_json_for_benchmark(
+      "../../scripts/tokenizers/bert-base-uncased.json");
   Tokenizer tokenizer = Tokenizer(config);
   std::string input =
       u8"Hello world! I'm learning BERT-based NLP with "
@@ -247,8 +247,8 @@ static void BM_TokenizerEncodeSingleFromConfigAddSpecialTokens(
 
 static void BM_TokenizerEncodePairFromConfigAddSpecialTokens(
     benchmark::State& state) { // NOLINT
-  std::string config =
-      read_json_for_benchmark("../scripts/tokenizers/bert-base-uncased.json");
+  std::string config = read_json_for_benchmark(
+      "../../scripts/tokenizers/bert-base-uncased.json");
   Tokenizer tokenizer = Tokenizer(config);
   std::pair<std::string, std::string> input =
       std::make_pair(u8"Hello world! I'm learning BERT-based NLP.",
@@ -262,8 +262,8 @@ static void BM_TokenizerEncodePairFromConfigAddSpecialTokens(
 
 static void BM_TokenizerEncodeSingleFromConfigNoSpecialTokens(
     benchmark::State& state) { // NOLINT
-  std::string config =
-      read_json_for_benchmark("../scripts/tokenizers/bert-base-uncased.json");
+  std::string config = read_json_for_benchmark(
+      "../../scripts/tokenizers/bert-base-uncased.json");
   Tokenizer tokenizer = Tokenizer(config);
   std::string input =
       u8"Hello world! I'm learning BERT-based NLP with "
@@ -277,8 +277,8 @@ static void BM_TokenizerEncodeSingleFromConfigNoSpecialTokens(
 
 static void BM_TokenizerEncodePairFromConfigNoSpecialTokens(
     benchmark::State& state) { // NOLINT
-  std::string config =
-      read_json_for_benchmark("../scripts/tokenizers/bert-base-uncased.json");
+  std::string config = read_json_for_benchmark(
+      "../../scripts/tokenizers/bert-base-uncased.json");
   Tokenizer tokenizer = Tokenizer(config);
   std::pair<std::string, std::string> input =
       std::make_pair(u8"Hello world! I'm learning BERT-based NLP.",
@@ -292,8 +292,8 @@ static void BM_TokenizerEncodePairFromConfigNoSpecialTokens(
 
 static void BM_TokenizerDecodeSingleFromConfigSkipSpecialTokens(
     benchmark::State& state) { // NOLINT
-  std::string config =
-      read_json_for_benchmark("../scripts/tokenizers/bert-base-uncased.json");
+  std::string config = read_json_for_benchmark(
+      "../../scripts/tokenizers/bert-base-uncased.json");
   Tokenizer tokenizer = Tokenizer(config);
   std::vector<int> input = {101,   7592, 2088, 999,   1045, 1005,  1049,  4083,
                             14324, 1011, 2241, 17953, 2361, 2007,  14477, 4246,
@@ -308,8 +308,8 @@ static void BM_TokenizerDecodeSingleFromConfigSkipSpecialTokens(
 
 static void BM_TokenizerDecodePairFromConfigSkipSpecialTokens(
     benchmark::State& state) { // NOLINT
-  std::string config =
-      read_json_for_benchmark("../scripts/tokenizers/bert-base-uncased.json");
+  std::string config = read_json_for_benchmark(
+      "../../scripts/tokenizers/bert-base-uncased.json");
   Tokenizer tokenizer = Tokenizer(config);
   std::vector<int> input = {
       101,   7592, 2088, 999,  1045, 1005, 1049,  4083, 14324, 1011, 2241,
@@ -324,8 +324,8 @@ static void BM_TokenizerDecodePairFromConfigSkipSpecialTokens(
 
 static void BM_TokenizerDecodeSingleFromConfigIncludeSpecialTokens(
     benchmark::State& state) { // NOLINT
-  std::string config =
-      read_json_for_benchmark("../scripts/tokenizers/bert-base-uncased.json");
+  std::string config = read_json_for_benchmark(
+      "../../scripts/tokenizers/bert-base-uncased.json");
   Tokenizer tokenizer = Tokenizer(config);
   std::vector<int> input = {101,   7592, 2088, 999,   1045, 1005,  1049,  4083,
                             14324, 1011, 2241, 17953, 2361, 2007,  14477, 4246,
@@ -340,8 +340,8 @@ static void BM_TokenizerDecodeSingleFromConfigIncludeSpecialTokens(
 
 static void BM_TokenizerDecodePairFromConfigIncludeSpecialTokens(
     benchmark::State& state) { // NOLINT
-  std::string config =
-      read_json_for_benchmark("../scripts/tokenizers/bert-base-uncased.json");
+  std::string config = read_json_for_benchmark(
+      "../../scripts/tokenizers/bert-base-uncased.json");
   Tokenizer tokenizer = Tokenizer(config);
   std::vector<int> input = {
       101,   7592, 2088, 999,  1045, 1005, 1049,  4083, 14324, 1011, 2241,

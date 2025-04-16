@@ -17,7 +17,7 @@ static void BM_PreTokenizerSplitRemoved(benchmark::State& state) { // NOLINT
   PreTokenizerResult input = PreTokenizerResult(
       icu::UnicodeString::fromUTF8(u8"the-final--countdown"));
   for (auto _ : state) {
-    PreTokenizerResult result = split(
+    PreTokenizerResult result = tokenizers::pre_tokenizers::split(
         input, [](UChar32 c) { return c == '-'; },
         SplitDelimiterBehavior::kRemoved);
     benchmark::DoNotOptimize(result);
@@ -28,7 +28,7 @@ static void BM_PreTokenizerSplitIsolated(benchmark::State& state) { // NOLINT
   PreTokenizerResult input = PreTokenizerResult(
       icu::UnicodeString::fromUTF8(u8"the-final--countdown"));
   for (auto _ : state) {
-    PreTokenizerResult result = split(
+    PreTokenizerResult result = tokenizers::pre_tokenizers::split(
         input, [](UChar32 c) { return c == '-'; },
         SplitDelimiterBehavior::kIsolated);
     benchmark::DoNotOptimize(result);
@@ -40,7 +40,7 @@ static void BM_PreTokenizerSplitMergedWithPrevious(
   PreTokenizerResult input = PreTokenizerResult(
       icu::UnicodeString::fromUTF8(u8"the-final--countdown"));
   for (auto _ : state) {
-    PreTokenizerResult result = split(
+    PreTokenizerResult result = tokenizers::pre_tokenizers::split(
         input, [](UChar32 c) { return c == '-'; },
         SplitDelimiterBehavior::kMergedWithPrevious);
     benchmark::DoNotOptimize(result);
@@ -52,7 +52,7 @@ static void BM_PreTokenizerSplitMergedWithNext(
   PreTokenizerResult input = PreTokenizerResult(
       icu::UnicodeString::fromUTF8(u8"the-final--countdown"));
   for (auto _ : state) {
-    PreTokenizerResult result = split(
+    PreTokenizerResult result = tokenizers::pre_tokenizers::split(
         input, [](UChar32 c) { return c == '-'; },
         SplitDelimiterBehavior::kMergedWithNext);
     benchmark::DoNotOptimize(result);
