@@ -304,9 +304,11 @@ TEST(TokenizerTest, InitFromConfig) {
   auto post_processor =
       std::dynamic_pointer_cast<TemplateProcessing>(tokenizer.post_processor);
   ASSERT_TRUE(post_processor != nullptr);
+  auto decoder = std::dynamic_pointer_cast<WordPieceDecoder>(tokenizer.decoder);
+  ASSERT_TRUE(decoder != nullptr);
 }
 
-TEST(TokenizerTest, EncodeSingleFromConfig) {
+TEST(TokenizerTest, EncodeSingleFromConfigAddSpecialTokens) {
   std::string config =
       read_json_for_test("../scripts/tokenizers/bert-base-uncased.json");
   Tokenizer tokenizer = Tokenizer(config);
@@ -344,7 +346,7 @@ TEST(TokenizerTest, EncodeSingleFromConfig) {
   assertTokenizerValues(got_encoding, expected_encoding);
 }
 
-TEST(TokenizerTest, EncodePairFromConfig) {
+TEST(TokenizerTest, EncodePairFromConfigAddSpecialTokens) {
   std::string config =
       read_json_for_test("../scripts/tokenizers/bert-base-uncased.json");
   Tokenizer tokenizer = Tokenizer(config);
@@ -421,7 +423,82 @@ TEST(TokenizerTest, EncodePairFromConfig) {
   assertTokenizerValues(got_encoding, expected_encoding);
 }
 
-TEST(TokenizerTest, DecodeSingleFromConfig) {
+TEST(TokenizerTest, EncodeSingleFromConfigNoSpecialTokens) {
+  std::string config =
+      read_json_for_test("../scripts/tokenizers/bert-base-uncased.json");
+  Tokenizer tokenizer = Tokenizer(config);
+  Encoding expected_encoding = Encoding(
+      {7592,  2088, 999,  1045,  1005, 1049, 4083, 14324, 1011,  2241,
+       17953, 2361, 2007, 14477, 4246, 8551, 3085, 5366,  1999,  7509,
+       9094,  1010, 1781, 1755,  1810, 1817, 1010, 1998,  18750, 100,
+       1740,  100,  100,  100,   100,  100,  1012},
+      {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+      {"hello",  "world", "!",      "i",     "'",     "m",     "learning",
+       "bert",   "-",     "based",  "nl",    "##p",   "with",  "una",
+       "##ff",   "##ord", "##able", "costs", "in",    "sao",   "paulo",
+       ",",      "北",    "京",     "大",    "学",    ",",     "and",
+       "python", "[UNK]", "一",     "[UNK]", "[UNK]", "[UNK]", "[UNK]",
+       "[UNK]",  "."},
+      {{0, 5},    {6, 11},  {11, 12}, {13, 14},  {14, 15},   {15, 16},
+       {17, 25},  {26, 30}, {30, 31}, {31, 36},  {37, 39},   {39, 40},
+       {41, 45},  {46, 49}, {49, 51}, {51, 54},  {54, 58},   {59, 64},
+       {65, 67},  {68, 71}, {72, 77}, {77, 78},  {79, 80},   {80, 81},
+       {81, 82},  {82, 83}, {83, 84}, {85, 88},  {89, 95},   {95, 96},
+       {96, 97},  {97, 98}, {98, 99}, {99, 100}, {100, 101}, {101, 102},
+       {102, 103}},
+      {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 10, 11,
+       12, 12, 12, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
+       22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32},
+      {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+      {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+       1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1});
+  Encoding got_encoding = tokenizer.Encode(
+      u8"Hello world! I'm learning BERT-based NLP with unaffordable costs in "
+      u8"São Paulo, 北京大学, and Python是一种编程语言.",
+      false);
+  assertTokenizerValues(got_encoding, expected_encoding);
+}
+
+TEST(TokenizerTest, EncodePairFromConfigNoSpecialTokens) {
+  std::string config =
+      read_json_for_test("../scripts/tokenizers/bert-base-uncased.json");
+  Tokenizer tokenizer = Tokenizer(config);
+  Encoding expected_encoding = Encoding(
+      {7592,  2088, 999,  1045, 1005, 1049,  4083, 14324, 1011, 2241,
+       17953, 2361, 1012, 2057, 2031, 14477, 4246, 8551,  3085, 5366,
+       1999,  7509, 9094, 1010, 1781, 1755,  1810, 1817,  1010, 1998,
+       18750, 100,  1740, 100,  100,  100,   100,  100,   1012},
+      {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1,
+       1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+      {"hello", "world", "!",      "i",     "'",      "m",     "learning",
+       "bert",  "-",     "based",  "nl",    "##p",    ".",     "we",
+       "have",  "una",   "##ff",   "##ord", "##able", "costs", "in",
+       "sao",   "paulo", ",",      "北",    "京",     "大",    "学",
+       ",",     "and",   "python", "[UNK]", "一",     "[UNK]", "[UNK]",
+       "[UNK]", "[UNK]", "[UNK]",  "."},
+      {{0, 5},   {6, 11},  {11, 12}, {13, 14}, {14, 15}, {15, 16}, {17, 25},
+       {26, 30}, {30, 31}, {31, 36}, {37, 39}, {39, 40}, {40, 41}, {0, 2},
+       {3, 7},   {8, 11},  {11, 13}, {13, 16}, {16, 20}, {21, 26}, {27, 29},
+       {30, 33}, {34, 39}, {39, 40}, {41, 42}, {42, 43}, {43, 44}, {44, 45},
+       {45, 46}, {47, 50}, {51, 57}, {57, 58}, {58, 59}, {59, 60}, {60, 61},
+       {61, 62}, {62, 63}, {63, 64}, {64, 65}},
+      {0, 1, 2, 3, 4, 5, 6,  7,  8,  9,  10, 10, 11, 0,  1,  2,  2,  2,  2, 3,
+       4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22},
+      {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+      {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+       1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1});
+  Encoding got_encoding = tokenizer.Encode(
+      std::make_pair(u8"Hello world! I'm learning BERT-based NLP.",
+                     u8"We have unaffordable costs in São Paulo, 北京大学, and "
+                     u8"Python是一种编程语言."),
+      false);
+  assertTokenizerValues(got_encoding, expected_encoding);
+}
+
+TEST(TokenizerTest, DecodeSingleFromConfigSkipSpecialTokens) {
   std::string config =
       read_json_for_test("../scripts/tokenizers/bert-base-uncased.json");
   Tokenizer tokenizer = Tokenizer(config);
@@ -436,7 +513,7 @@ TEST(TokenizerTest, DecodeSingleFromConfig) {
   ASSERT_EQ(got_result, expected_result);
 }
 
-TEST(TokenizerTest, DecodePairFromConfig) {
+TEST(TokenizerTest, DecodePairFromConfigSkipSpecialTokens) {
   std::string config =
       read_json_for_test("../scripts/tokenizers/bert-base-uncased.json");
   Tokenizer tokenizer = Tokenizer(config);
@@ -448,5 +525,41 @@ TEST(TokenizerTest, DecodePairFromConfig) {
        17953, 2361, 1012, 102,  2057, 2031, 14477, 4246, 8551,  3085, 5366,
        1999,  7509, 9094, 1010, 1781, 1755, 1810,  1817, 1010,  1998, 18750,
        100,   1740, 100,  100,  100,  100,  100,   1012, 102});
+  ASSERT_EQ(got_result, expected_result);
+}
+
+TEST(TokenizerTest, DecodeSingleFromConfigIncludeSpecialTokens) {
+  std::string config =
+      read_json_for_test("../scripts/tokenizers/bert-base-uncased.json");
+  Tokenizer tokenizer = Tokenizer(config);
+  std::string expected_result =
+      "[CLS] hello world! i ' m learning bert - based nlp with unaffordable "
+      "costs in "
+      "sao paulo, 北 京 大 学, and python [UNK] 一 [UNK] [UNK] [UNK] [UNK] "
+      "[UNK]. [SEP]";
+  std::string got_result = tokenizer.Decode(
+      {101,  7592,  2088, 999,  1045,  1005, 1049, 4083, 14324, 1011,
+       2241, 17953, 2361, 2007, 14477, 4246, 8551, 3085, 5366,  1999,
+       7509, 9094,  1010, 1781, 1755,  1810, 1817, 1010, 1998,  18750,
+       100,  1740,  100,  100,  100,   100,  100,  1012, 102},
+      false);
+  ASSERT_EQ(got_result, expected_result);
+}
+
+TEST(TokenizerTest, DecodePairFromConfigIncludeSpecialTokens) {
+  std::string config =
+      read_json_for_test("../scripts/tokenizers/bert-base-uncased.json");
+  Tokenizer tokenizer = Tokenizer(config);
+  std::string expected_result =
+      "[CLS] hello world! i ' m learning bert - based nlp. [SEP] we have "
+      "unaffordable "
+      "costs in sao paulo, 北 京 大 学, and python [UNK] 一 [UNK] [UNK] [UNK] "
+      "[UNK] [UNK]. [SEP]";
+  std::string got_result = tokenizer.Decode(
+      {101,   7592, 2088, 999,  1045, 1005, 1049,  4083, 14324, 1011, 2241,
+       17953, 2361, 1012, 102,  2057, 2031, 14477, 4246, 8551,  3085, 5366,
+       1999,  7509, 9094, 1010, 1781, 1755, 1810,  1817, 1010,  1998, 18750,
+       100,   1740, 100,  100,  100,  100,  100,   1012, 102},
+      false);
   ASSERT_EQ(got_result, expected_result);
 }

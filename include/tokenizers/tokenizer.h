@@ -57,8 +57,7 @@ class Tokenizer {
   std::string version;
 
  private:
-  Encoding EncodeSingleSequence(icu::UnicodeString *unicode_input, int type_id,
-                                bool add_special_tokens = true);
+  Encoding EncodeSingleSequence(icu::UnicodeString *unicode_input, int type_id);
 };
 
 } // namespace tokenizers

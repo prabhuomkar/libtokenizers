@@ -230,7 +230,7 @@ static void BM_TokenizerInitFromConfig(benchmark::State& state) { // NOLINT
   }
 }
 
-static void BM_TokenizerEncodeSingleFromConfig(
+static void BM_TokenizerEncodeSingleFromConfigAddSpecialTokens(
     benchmark::State& state) { // NOLINT
   std::string config =
       read_json_for_benchmark("../scripts/tokenizers/bert-base-uncased.json");
@@ -245,7 +245,7 @@ static void BM_TokenizerEncodeSingleFromConfig(
   }
 }
 
-static void BM_TokenizerEncodePairFromConfig(
+static void BM_TokenizerEncodePairFromConfigAddSpecialTokens(
     benchmark::State& state) { // NOLINT
   std::string config =
       read_json_for_benchmark("../scripts/tokenizers/bert-base-uncased.json");
@@ -260,7 +260,69 @@ static void BM_TokenizerEncodePairFromConfig(
   }
 }
 
-static void BM_TokenizerDecodeSingleFromConfig(
+static void BM_TokenizerEncodeSingleFromConfigNoSpecialTokens(
+    benchmark::State& state) { // NOLINT
+  std::string config =
+      read_json_for_benchmark("../scripts/tokenizers/bert-base-uncased.json");
+  Tokenizer tokenizer = Tokenizer(config);
+  std::string input =
+      u8"Hello world! I'm learning BERT-based NLP with "
+      u8"unaffordable costs in "
+      u8"São Paulo, 北京大学, and Python是一种编程语言.";
+  for (auto _ : state) {
+    Encoding output = tokenizer.Encode(input, false);
+    benchmark::DoNotOptimize(output);
+  }
+}
+
+static void BM_TokenizerEncodePairFromConfigNoSpecialTokens(
+    benchmark::State& state) { // NOLINT
+  std::string config =
+      read_json_for_benchmark("../scripts/tokenizers/bert-base-uncased.json");
+  Tokenizer tokenizer = Tokenizer(config);
+  std::pair<std::string, std::string> input =
+      std::make_pair(u8"Hello world! I'm learning BERT-based NLP.",
+                     u8"We have unaffordable costs in São Paulo, 北京大学, and "
+                     u8"Python是一种编程语言.");
+  for (auto _ : state) {
+    Encoding output = tokenizer.Encode(input, false);
+    benchmark::DoNotOptimize(output);
+  }
+}
+
+static void BM_TokenizerDecodeSingleFromConfigSkipSpecialTokens(
+    benchmark::State& state) { // NOLINT
+  std::string config =
+      read_json_for_benchmark("../scripts/tokenizers/bert-base-uncased.json");
+  Tokenizer tokenizer = Tokenizer(config);
+  std::vector<int> input = {101,   7592, 2088, 999,   1045, 1005,  1049,  4083,
+                            14324, 1011, 2241, 17953, 2361, 2007,  14477, 4246,
+                            8551,  3085, 5366, 1999,  7509, 9094,  1010,  1781,
+                            1755,  1810, 1817, 1010,  1998, 18750, 100,   1740,
+                            100,   100,  100,  100,   100,  1012,  102};
+  for (auto _ : state) {
+    std::string output = tokenizer.Decode(input, true);
+    benchmark::DoNotOptimize(output);
+  }
+}
+
+static void BM_TokenizerDecodePairFromConfigSkipSpecialTokens(
+    benchmark::State& state) { // NOLINT
+  std::string config =
+      read_json_for_benchmark("../scripts/tokenizers/bert-base-uncased.json");
+  Tokenizer tokenizer = Tokenizer(config);
+  std::vector<int> input = {
+      101,   7592, 2088, 999,  1045, 1005, 1049,  4083, 14324, 1011, 2241,
+      17953, 2361, 1012, 102,  2057, 2031, 14477, 4246, 8551,  3085, 5366,
+      1999,  7509, 9094, 1010, 1781, 1755, 1810,  1817, 1010,  1998, 18750,
+      100,   1740, 100,  100,  100,  100,  100,   1012, 102};
+  for (auto _ : state) {
+    std::string output = tokenizer.Decode(input, true);
+    benchmark::DoNotOptimize(output);
+  }
+}
+
+static void BM_TokenizerDecodeSingleFromConfigIncludeSpecialTokens(
     benchmark::State& state) { // NOLINT
   std::string config =
       read_json_for_benchmark("../scripts/tokenizers/bert-base-uncased.json");
@@ -276,7 +338,7 @@ static void BM_TokenizerDecodeSingleFromConfig(
   }
 }
 
-static void BM_TokenizerDecodePairFromConfig(
+static void BM_TokenizerDecodePairFromConfigIncludeSpecialTokens(
     benchmark::State& state) { // NOLINT
   std::string config =
       read_json_for_benchmark("../scripts/tokenizers/bert-base-uncased.json");
@@ -298,7 +360,12 @@ BENCHMARK(BM_TokenizerEncodePair)->ThreadPerCpu();
 BENCHMARK(BM_TokenizerDecodeSingle)->ThreadPerCpu();
 BENCHMARK(BM_TokenizerDecodePair)->ThreadPerCpu();
 BENCHMARK(BM_TokenizerInitFromConfig)->ThreadPerCpu();
-BENCHMARK(BM_TokenizerEncodeSingleFromConfig)->ThreadPerCpu();
-BENCHMARK(BM_TokenizerEncodePairFromConfig)->ThreadPerCpu();
-BENCHMARK(BM_TokenizerDecodeSingleFromConfig)->ThreadPerCpu();
-BENCHMARK(BM_TokenizerDecodePairFromConfig)->ThreadPerCpu();
+BENCHMARK(BM_TokenizerEncodeSingleFromConfigAddSpecialTokens)->ThreadPerCpu();
+BENCHMARK(BM_TokenizerEncodePairFromConfigAddSpecialTokens)->ThreadPerCpu();
+BENCHMARK(BM_TokenizerEncodeSingleFromConfigNoSpecialTokens)->ThreadPerCpu();
+BENCHMARK(BM_TokenizerEncodePairFromConfigNoSpecialTokens)->ThreadPerCpu();
+BENCHMARK(BM_TokenizerDecodeSingleFromConfigSkipSpecialTokens)->ThreadPerCpu();
+BENCHMARK(BM_TokenizerDecodePairFromConfigSkipSpecialTokens)->ThreadPerCpu();
+BENCHMARK(BM_TokenizerDecodeSingleFromConfigIncludeSpecialTokens)
+    ->ThreadPerCpu();
+BENCHMARK(BM_TokenizerDecodePairFromConfigIncludeSpecialTokens)->ThreadPerCpu();

@@ -26,10 +26,9 @@ std::shared_ptr<AddedVocabulary> parseAddedVocabulary(
   if (config.is_null())
     return nullptr;
 
-  std::vector<AddedToken> added_tokens;
-
   auto added_tokens_result = config.get_array();
   if (added_tokens_result.error() == simdjson::SUCCESS) {
+    std::vector<AddedToken> added_tokens;
     for (auto element : added_tokens_result) {
       int id = get_int64_or_default(std::move(element), "id");
       std::string content =
@@ -206,12 +205,11 @@ Tokenizer::Tokenizer(const std::string& json_config) {
 
 Encoding Tokenizer::Encode(const std::string& input, bool add_special_tokens) {
   icu::UnicodeString unicode_input = icu::UnicodeString::fromUTF8(input);
-  std::vector<Encoding> encodings = {
-      EncodeSingleSequence(&unicode_input, 0, add_special_tokens)};
+  std::vector<Encoding> encodings = {EncodeSingleSequence(&unicode_input, 0)};
   if (truncation.get() != nullptr) {
     truncation->TruncateEncodings(encodings);
   }
-  if (post_processor.get() != nullptr) {
+  if (add_special_tokens && post_processor.get() != nullptr) {
     encodings = post_processor->ProcessEncodings(encodings);
   }
   if (padding.get() != nullptr) {
@@ -244,12 +242,12 @@ Encoding Tokenizer::Encode(const std::pair<std::string, std::string>& input,
       icu::UnicodeString::fromUTF8(input.first),
       icu::UnicodeString::fromUTF8(input.second)};
   std::vector<Encoding> encodings = {
-      EncodeSingleSequence(&unicode_input.first, 0, add_special_tokens),
-      EncodeSingleSequence(&unicode_input.second, 1, add_special_tokens)};
+      EncodeSingleSequence(&unicode_input.first, 0),
+      EncodeSingleSequence(&unicode_input.second, 1)};
   if (truncation.get() != nullptr) {
     truncation->TruncateEncodings(encodings);
   }
-  if (post_processor.get() != nullptr) {
+  if (add_special_tokens && post_processor.get() != nullptr) {
     encodings = post_processor->ProcessEncodings(encodings);
   }
   if (padding.get() != nullptr) {
@@ -297,7 +295,7 @@ std::string Tokenizer::Decode(const std::vector<int>& ids,
 }
 
 Encoding Tokenizer::EncodeSingleSequence(icu::UnicodeString* unicode_input,
-                                         int type_id, bool add_special_tokens) {
+                                         int type_id) {
   normalizers::NormalizerResult normalized =
       normalizers::NormalizerResult(*unicode_input);
   std::vector<normalizers::NormalizerResult> splits = {normalized};

@@ -5,6 +5,7 @@
 #include <unicode/uchar.h>
 #include <unicode/unistr.h>
 
+#include <algorithm>
 #include <functional>
 #include <iostream>
 #include <string>
@@ -35,9 +36,11 @@ PreTokenizerResult::PreTokenizerResult(
     const std::vector<std::vector<std::pair<int, int>>>& char_offsets)
     : pre_tokenized(pre_tokenized), char_offsets(char_offsets) {
   offsets.reserve(pre_tokenized.size());
-  for (const std::vector<std::pair<int, int>>& char_offset : char_offsets) {
-    offsets.emplace_back(char_offset.front().first, char_offset.back().second);
-  }
+  std::transform(char_offsets.begin(), char_offsets.end(),
+                 std::back_inserter(offsets),
+                 [](const std::vector<std::pair<int, int>>& vec) {
+                   return std::make_pair(vec.front().first, vec.back().second);
+                 });
 }
 
 PreTokenizerResult::PreTokenizerResult(
