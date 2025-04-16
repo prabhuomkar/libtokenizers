@@ -14,11 +14,14 @@ namespace normalizers {
 
 class NormalizerResult {
  public:
-  explicit NormalizerResult(const icu::UnicodeString& normalized);
+  explicit NormalizerResult(const icu::UnicodeString& normalized,
+                            bool pre_normalized = false);
   NormalizerResult(const icu::UnicodeString& normalized,
-                   const std::vector<std::pair<int, int>>& offsets);
+                   const std::vector<std::pair<int, int>>& offsets,
+                   bool pre_normalized = false);
   icu::UnicodeString normalized;
   std::vector<std::pair<int, int>> offsets;
+  bool pre_normalized;
 };
 
 void transform_offsets(NormalizerResult* input,

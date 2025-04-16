@@ -278,3 +278,30 @@ TEST(PaddingTest, StrategyFixed) {
   std::vector<Encoding> got = padding.PadEncodings(input);
   assertUtilsValues(got, expected);
 }
+
+TEST(FindMatchesTest, SplitsFound) {
+  icu::UnicodeString input =
+      icu::UnicodeString::fromUTF8("Hello, world! [MASK] never said Hello");
+  std::vector<icu::UnicodeString> patterns = {
+      icu::UnicodeString::fromUTF8("[MASK]"),
+      icu::UnicodeString::fromUTF8("Hello")};
+  std::vector<std::pair<int, int>> expected = {{0, 5}, {14, 20}, {32, 37}};
+  std::vector<std::pair<int, int>> got =
+      tokenizers::FindMatches(input, patterns);
+  ASSERT_EQ(got.size(), expected.size());
+  for (int i = 0; i < got.size(); i++) {
+    ASSERT_EQ(got[i].first, expected[i].first);
+    ASSERT_EQ(got[i].second, expected[i].second);
+  }
+}
+
+TEST(FindMatchesTest, NoSplitsFound) {
+  icu::UnicodeString input = icu::UnicodeString::fromUTF8("Hello, world!");
+  std::vector<icu::UnicodeString> patterns = {
+      icu::UnicodeString::fromUTF8("Goodbye"),
+      icu::UnicodeString::fromUTF8("moon"), icu::UnicodeString::fromUTF8("! ")};
+  std::vector<std::pair<int, int>> expected = {};
+  std::vector<std::pair<int, int>> got =
+      tokenizers::FindMatches(input, patterns);
+  ASSERT_EQ(got.size(), expected.size());
+}

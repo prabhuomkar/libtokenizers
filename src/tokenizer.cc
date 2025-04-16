@@ -300,13 +300,26 @@ Encoding Tokenizer::EncodeSingleSequence(icu::UnicodeString* unicode_input,
                                          int type_id, bool add_special_tokens) {
   normalizers::NormalizerResult normalized =
       normalizers::NormalizerResult(*unicode_input);
+  std::vector<normalizers::NormalizerResult> splits = {normalized};
+  if (added_vocabulary.get() != nullptr) {
+    splits = added_vocabulary->FindSplits(normalized);
+  }
   if (normalizer.get() != nullptr) {
-    normalized = normalizer->Normalize(normalized);
+    for (normalizers::NormalizerResult& split : splits) {
+      if (!split.pre_normalized) {
+        split = normalizer->Normalize(normalized);
+      }
+    }
+  }
+  std::vector<icu::UnicodeString> normalized_strings;
+  std::vector<std::vector<std::pair<int, int>>> normalized_offsets;
+  for (const normalizers::NormalizerResult& split : splits) {
+    normalized_strings.emplace_back(split.normalized);
+    normalized_offsets.emplace_back(split.offsets);
   }
   pre_tokenizers::PreTokenizerResult pre_tokenized =
-      pre_tokenizers::PreTokenizerResult(
-          {normalized.normalized},
-          std::vector<std::vector<std::pair<int, int>>>({normalized.offsets}));
+      pre_tokenizers::PreTokenizerResult(normalized_strings,
+                                         normalized_offsets);
   if (pre_tokenizer.get() != nullptr) {
     pre_tokenized = pre_tokenizer->PreTokenize(pre_tokenized);
   }

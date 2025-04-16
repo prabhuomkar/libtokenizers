@@ -1,6 +1,11 @@
 // Copyright 2025 Omkar Prabhu
 #include "tokenizers/utils.h"
 
+#include <unicode/schriter.h>
+#include <unicode/uchar.h>
+#include <unicode/unistr.h>
+#include <unicode/ustring.h>
+
 #include <algorithm>
 #include <cstdio>
 #include <string>
@@ -256,6 +261,25 @@ std::vector<Encoding> Padding::PadEncodings(
   }
 
   return result;
+}
+
+// TODO(omkar): Add Aho-Corasick algorithm for better performance
+std::vector<std::pair<int, int>> FindMatches(
+    const icu::UnicodeString& input,
+    const std::vector<icu::UnicodeString>& patterns) {
+  std::vector<std::pair<int, int>> matches;
+  for (const icu::UnicodeString& pattern : patterns) {
+    int start = 0;
+    while (true) {
+      start = input.indexOf(pattern, start);
+      if (start == -1)
+        break;
+      matches.emplace_back(start, start + pattern.length());
+      start += pattern.length();
+    }
+  }
+  std::sort(matches.begin(), matches.end());
+  return matches;
 }
 
 } // namespace tokenizers

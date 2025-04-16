@@ -1,6 +1,12 @@
 // Copyright 2025 Omkar Prabhu
 #pragma once
 
+#include <unicode/regex.h>
+#include <unicode/schriter.h>
+#include <unicode/uchar.h>
+#include <unicode/unistr.h>
+#include <unicode/ustring.h>
+
 #include <string>
 #include <utility>
 #include <vector>
@@ -56,5 +62,9 @@ class Padding {
 void PadEncoding(Encoding *encoding, int target_length, int pad_id,
                  int pad_type_id, const std::string &pad_token,
                  PaddingDirection direction);
+
+std::vector<std::pair<int, int>> FindMatches(
+    const icu::UnicodeString &input,
+    const std::vector<icu::UnicodeString> &patterns);
 
 } // namespace tokenizers

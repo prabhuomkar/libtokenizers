@@ -52,8 +52,9 @@ void transform_offsets(NormalizerResult* input,
   }
 }
 
-NormalizerResult::NormalizerResult(const icu::UnicodeString& normalized)
-    : normalized(normalized) {
+NormalizerResult::NormalizerResult(const icu::UnicodeString& normalized,
+                                   bool pre_normalized)
+    : normalized(normalized), pre_normalized(pre_normalized) {
   offsets.reserve(normalized.countChar32());
   icu::StringCharacterIterator it(normalized);
   for (it.first(); it.hasNext();) {
@@ -66,8 +67,10 @@ NormalizerResult::NormalizerResult(const icu::UnicodeString& normalized)
 
 NormalizerResult::NormalizerResult(
     const icu::UnicodeString& normalized,
-    const std::vector<std::pair<int, int>>& offsets)
-    : normalized(normalized), offsets(offsets) {}
+    const std::vector<std::pair<int, int>>& offsets, bool pre_normalized)
+    : normalized(normalized),
+      offsets(offsets),
+      pre_normalized(pre_normalized) {}
 
 Normalizer::Normalizer() {}
 

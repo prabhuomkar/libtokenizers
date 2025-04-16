@@ -46,7 +46,6 @@ class Tokenizer {
   std::string Decode(const std::vector<int> &ids,
                      bool skip_special_tokens = true);
 
-  std::shared_ptr<std::vector<AddedToken>> added_tokens;
   std::shared_ptr<tokenizers::normalizers::Normalizer> normalizer;
   std::shared_ptr<tokenizers::pre_tokenizers::PreTokenizer> pre_tokenizer;
   std::shared_ptr<tokenizers::models::Model> model;
