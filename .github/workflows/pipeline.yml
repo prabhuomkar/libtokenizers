@@ -1,0 +1,68 @@
+name: LibTokenizers CI
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+jobs:
+  linux:
+    name: Build and Test on Linux
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake python3-pip libicu-dev
+          pip3 install cpplint
+      - name: Run Lint
+        run: |
+          cpplint --recursive include/ src/ tests/
+      - name: Configure with CMake
+        run: |
+          cmake -E make_directory build
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON
+      - name: Run Build
+        run: cmake --build build --config Release
+      - name: Run Tests
+        run: |
+          cmake --build build --target tokenizers_tests
+          ctest --test-dir build --output-on-failure
+      - name: Run Benchmarks
+        run: |
+          cmake --build build --target tokenizers_benchmarks
+          cd build/tests
+          ./tokenizers_benchmarks
+  macos:
+    name: Build and Test on macOS
+    runs-on: macos-latest
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install Dependencies
+        run: |
+          pip3 install --break-system-packages cpplint
+          brew install icu4c
+      - name: Run Lint
+        run: |
+          cpplint --recursive include/ src/ tests/
+      - name: Configure with CMake
+        run: |
+          cmake -E make_directory build
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON -DICU_ROOT=$(brew --prefix icu4c)
+      - name: Run Build
+        run: cmake --build build --config Release
+      - name: Run Tests
+        run: |
+          cmake --build build --target tokenizers_tests
+          ctest --test-dir build --output-on-failure
+      - name: Run Benchmarks
+        run: |
+          cmake --build build --target tokenizers_benchmarks
+          cd build/tests
+          ./tokenizers_benchmarks
