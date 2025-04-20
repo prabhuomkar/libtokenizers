@@ -54,3 +54,4 @@ report
 icu/*
 cppcheck*
 paper/*
+libtorch/

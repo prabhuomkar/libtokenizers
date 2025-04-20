@@ -25,6 +25,7 @@ class PreTokenizerResult {
   std::vector<icu::UnicodeString> pre_tokenized;
   std::vector<std::vector<std::pair<int, int>>> char_offsets;
   std::vector<std::pair<int, int>> offsets;
+  bool pre_pre_tokenized;
 };
 
 enum class SplitDelimiterBehavior {

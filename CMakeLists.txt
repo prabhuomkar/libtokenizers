@@ -69,3 +69,8 @@ if(BUILD_TESTS STREQUAL "ON")
   enable_testing()
   add_subdirectory(tests)
 endif()
+
+if(BUILD_EXAMPLES STREQUAL "ON")
+  message(STATUS "Building Examples")
+  add_subdirectory(examples)
+endif()

@@ -298,44 +298,51 @@ Encoding Tokenizer::EncodeSingleSequence(icu::UnicodeString* unicode_input,
                                          int type_id) {
   normalizers::NormalizerResult normalized =
       normalizers::NormalizerResult(*unicode_input);
-  std::vector<normalizers::NormalizerResult> splits = {normalized};
+  std::vector<normalizers::NormalizerResult> normalized_splits = {normalized};
   if (added_vocabulary.get() != nullptr) {
-    splits = added_vocabulary->FindSplits(normalized);
+    normalized_splits = added_vocabulary->FindSplits(normalized);
   }
   if (normalizer.get() != nullptr) {
-    for (normalizers::NormalizerResult& split : splits) {
+    for (normalizers::NormalizerResult& split : normalized_splits) {
       if (!split.pre_normalized) {
-        split = normalizer->Normalize(normalized);
+        split = normalizer->Normalize(split);
       }
     }
   }
-  std::vector<icu::UnicodeString> normalized_strings;
-  std::vector<std::vector<std::pair<int, int>>> normalized_offsets;
-  for (const normalizers::NormalizerResult& split : splits) {
-    normalized_strings.emplace_back(split.normalized);
-    normalized_offsets.emplace_back(split.offsets);
+  std::vector<pre_tokenizers::PreTokenizerResult> pre_tokenized_splits;
+  for (const normalizers::NormalizerResult& split : normalized_splits) {
+    pre_tokenizers::PreTokenizerResult pre_tokenized =
+        pre_tokenizers::PreTokenizerResult(
+            {split.normalized},
+            std::vector<std::vector<std::pair<int, int>>>({{split.offsets}}));
+    pre_tokenized.pre_pre_tokenized = split.pre_normalized;
+    pre_tokenized_splits.emplace_back(pre_tokenized);
   }
-  pre_tokenizers::PreTokenizerResult pre_tokenized =
-      pre_tokenizers::PreTokenizerResult(normalized_strings,
-                                         normalized_offsets);
   if (pre_tokenizer.get() != nullptr) {
-    pre_tokenized = pre_tokenizer->PreTokenize(pre_tokenized);
+    for (pre_tokenizers::PreTokenizerResult& split : pre_tokenized_splits) {
+      if (!split.pre_pre_tokenized) {
+        split = pre_tokenizer->PreTokenize(split);
+      }
+    }
   }
   Encoding encoding;
   if (model.get() != nullptr) {
     int word_id = -1;
-    for (int i = 0; i < pre_tokenized.pre_tokenized.size(); i++) {
-      std::vector<Token> tokens = model->Tokenize(
-          pre_tokenized.pre_tokenized[i], pre_tokenized.offsets[i]);
-      for (const Token& token : tokens) {
-        encoding.ids.emplace_back(token.id);
-        encoding.tokens.emplace_back(token.value);
-        encoding.type_ids.emplace_back(type_id);
-        encoding.offsets.emplace_back(token.offsets);
-        encoding.word_ids.emplace_back(token.is_continuing_subword ? word_id
-                                                                   : ++word_id);
-        encoding.special_tokens_mask.emplace_back(0);
-        encoding.attention_mask.emplace_back(1);
+    for (const pre_tokenizers::PreTokenizerResult& pre_tokenized :
+         pre_tokenized_splits) {
+      for (int i = 0; i < pre_tokenized.pre_tokenized.size(); i++) {
+        std::vector<Token> tokens = model->Tokenize(
+            pre_tokenized.pre_tokenized[i], pre_tokenized.offsets[i]);
+        for (const Token& token : tokens) {
+          encoding.ids.emplace_back(token.id);
+          encoding.tokens.emplace_back(token.value);
+          encoding.type_ids.emplace_back(type_id);
+          encoding.offsets.emplace_back(token.offsets);
+          encoding.word_ids.emplace_back(
+              token.is_continuing_subword ? word_id : ++word_id);
+          encoding.special_tokens_mask.emplace_back(0);
+          encoding.attention_mask.emplace_back(1);
+        }
       }
     }
   }
