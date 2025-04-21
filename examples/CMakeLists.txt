@@ -27,7 +27,6 @@ add_executable(mobilebert-fill-mask mobilebert-fill-mask/main.cc)
 target_include_directories(mobilebert-fill-mask
   PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/../include
-    ${ICU_INCLUDE_DIRS}
 )
 
 target_link_libraries(mobilebert-fill-mask 

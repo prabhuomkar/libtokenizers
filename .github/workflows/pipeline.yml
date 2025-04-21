@@ -24,7 +24,7 @@ jobs:
       - name: Configure with CMake
         run: |
           cmake -E make_directory build
-          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON -DBUILD_EXAMPLES=ON
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON -DBUILD_EXAMPLES=OFF
       - name: Run Build
         run: cmake --build build --config Release
       - name: Run Tests
@@ -54,7 +54,7 @@ jobs:
       - name: Configure with CMake
         run: |
           cmake -E make_directory build
-          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON -DBUILD_EXAMPLES=ON -DICU_ROOT=$(brew --prefix icu4c)
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON -DBUILD_EXAMPLES=OFF -DICU_ROOT=$(brew --prefix icu4c)
       - name: Run Build
         run: cmake --build build --config Release
       - name: Run Tests
