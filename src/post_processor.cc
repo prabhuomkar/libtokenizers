@@ -15,7 +15,7 @@ namespace post_processors {
 PostProcessor::PostProcessor() {}
 
 std::vector<Encoding> PostProcessor::ProcessEncodings(
-    const std::vector<Encoding>& encodings) {
+    std::vector<Encoding> encodings) {
   return {};
 }
 
@@ -34,7 +34,7 @@ TemplateProcessing::TemplateProcessing(
     : single_(single), pair_(pair), special_tokens_(special_tokens) {}
 
 std::vector<Encoding> TemplateProcessing::ProcessEncodings(
-    const std::vector<Encoding>& encodings) {
+    std::vector<Encoding> encodings) {
   const std::vector<TemplateProcessor>& seq_processor =
       encodings.size() == 1 ? single_ : pair_;
   std::vector<Encoding> result;

@@ -154,6 +154,20 @@ void doStripAccents(NormalizerResult* input) {
         std::string("failed to get normalizer instance: ") +
         u_errorName(error_code));
   }
+  
+  std::vector<std::pair<int, int>> expand_ops;
+  icu::StringCharacterIterator expand_it(input->normalized);
+  int char_idx = 0;
+  for (expand_it.first(); expand_it.hasNext(); char_idx++) {
+    UChar32 c = expand_it.next32PostInc();
+    icu::UnicodeString decomposed;
+    normalizer->normalize(icu::UnicodeString(c), decomposed, error_code);
+    int extra = decomposed.countChar32() - 1;
+    if (extra >= 1) {
+      expand_ops.emplace_back(char_idx, extra);
+    } 
+  }
+  transform_offsets(input, expand_ops);
 
   icu::UnicodeString normalized;
   normalizer->normalize(input->normalized, normalized, error_code);
@@ -163,15 +177,20 @@ void doStripAccents(NormalizerResult* input) {
   }
 
   icu::UnicodeString result;
-  icu::StringCharacterIterator it(normalized);
-  for (it.first(); it.hasNext();) {
-    UChar32 c = it.next32PostInc();
-    if (u_charType(c) != U_NON_SPACING_MARK) {
+  std::vector<std::pair<int, int>> remove_ops;
+  icu::StringCharacterIterator remove_it(normalized);
+  char_idx = 0;
+  for (remove_it.first(); remove_it.hasNext(); char_idx++) {
+    UChar32 c = remove_it.next32PostInc();
+    if (u_charType(c) == U_NON_SPACING_MARK) {
+      remove_ops.emplace_back(char_idx, -1);
+    } else {
       result.append(c);
     }
   }
 
   input->normalized = result;
+  transform_offsets(input, remove_ops);
 }
 
 void doLowercase(NormalizerResult* input) { input->normalized.toLower(); }

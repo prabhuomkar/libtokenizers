@@ -16,12 +16,12 @@ namespace tokenizers {
 class Encoding {
  public:
   Encoding();
-  Encoding(const std::vector<int> &ids, const std::vector<int> &type_ids,
-           const std::vector<std::string> &tokens,
-           const std::vector<std::pair<int, int>> &offsets,
-           const std::vector<std::optional<int>> &word_ids,
-           const std::vector<int> &special_tokens_mask,
-           const std::vector<int> &attention_mask);
+  Encoding(std::vector<int> ids, std::vector<int> type_ids,
+          std::vector<std::string> tokens,
+          std::vector<std::pair<int, int>> offsets,
+          std::vector<std::optional<int>> word_ids,
+          std::vector<int> special_tokens_mask,
+          std::vector<int> attention_mask);
 
   std::vector<int> ids;
   std::vector<int> type_ids;
@@ -36,7 +36,7 @@ class Encoding {
 class Token {
  public:
   Token();
-  Token(const std::string &value, int id, const std::pair<int, int> &offsets,
+  Token(std::string value, int id, std::pair<int, int> offsets,
         bool is_continuing_subword);
   std::string value;
   int id;

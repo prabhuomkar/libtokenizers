@@ -207,13 +207,13 @@ Encoding Tokenizer::Encode(const std::string& input, bool add_special_tokens) {
   icu::UnicodeString unicode_input = icu::UnicodeString::fromUTF8(input);
   std::vector<Encoding> encodings = {EncodeSingleSequence(&unicode_input, 0)};
   if (truncation.get() != nullptr) {
-    truncation->TruncateEncodings(encodings);
+    encodings = truncation->TruncateEncodings(encodings);
   }
   if (add_special_tokens && post_processor.get() != nullptr) {
-    encodings = post_processor->ProcessEncodings(encodings);
+    encodings = post_processor->ProcessEncodings(std::move(encodings));
   }
   if (padding.get() != nullptr) {
-    padding->PadEncodings(encodings);
+    encodings = padding->PadEncodings(encodings);
   }
   Encoding encoding;
   for (const Encoding& enc : encodings) {
@@ -245,13 +245,13 @@ Encoding Tokenizer::Encode(const std::pair<std::string, std::string>& input,
       EncodeSingleSequence(&unicode_input.first, 0),
       EncodeSingleSequence(&unicode_input.second, 1)};
   if (truncation.get() != nullptr) {
-    truncation->TruncateEncodings(encodings);
+    encodings = truncation->TruncateEncodings(encodings);
   }
   if (add_special_tokens && post_processor.get() != nullptr) {
-    encodings = post_processor->ProcessEncodings(encodings);
+    encodings = post_processor->ProcessEncodings(std::move(encodings));
   }
   if (padding.get() != nullptr) {
-    padding->PadEncodings(encodings);
+    encodings = padding->PadEncodings(encodings);
   }
   Encoding encoding;
   for (const Encoding& enc : encodings) {
@@ -286,8 +286,13 @@ std::string Tokenizer::Decode(const std::vector<int>& ids,
       tokens.emplace_back(opt_token.value());
     }
   }
-  std::string result = "";
-  tokens = decoder->DecodeChain(tokens);
+  tokens = decoder->DecodeChain(std::move(tokens));
+  size_t total_len = 0;
+  for (const std::string& token : tokens) {
+    total_len += token.size();
+  }
+  std::string result;
+  result.reserve(total_len);
   for (const std::string& token : tokens) {
     result += token;
   }
@@ -346,6 +351,7 @@ Encoding Tokenizer::EncodeSingleSequence(icu::UnicodeString* unicode_input,
       }
     }
   }
+
   return encoding;
 }
 

@@ -28,9 +28,9 @@ class Model {
 // WordPiece
 class WordPiece : public Model {
  public:
-  explicit WordPiece(const std::unordered_map<std::string, int>& vocab,
-                     const std::string& unk_token = "[UNK]",
-                     const std::string& continuing_subword_prefix = "##",
+  explicit WordPiece(std::unordered_map<std::string, int> vocab,
+                    std::string unk_token = "[UNK]",
+                    std::string continuing_subword_prefix = "##",
                      int max_input_chars_per_word = 100);
   std::vector<Token> Tokenize(const icu::UnicodeString& input,
                               const std::pair<int, int>& offset) override;

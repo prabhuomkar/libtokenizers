@@ -16,7 +16,7 @@ class PostProcessor {
  public:
   PostProcessor();
   virtual std::vector<Encoding> ProcessEncodings(
-      const std::vector<Encoding>& encodings);
+      std::vector<Encoding> encodings);
 };
 
 class TemplateProcessor {
@@ -39,7 +39,7 @@ class TemplateProcessing : public PostProcessor {
       const std::vector<TemplateProcessor>& pair,
       const std::unordered_map<std::string, int>& special_tokens);
   std::vector<Encoding> ProcessEncodings(
-      const std::vector<Encoding>& encodings) override;
+      std::vector<Encoding> encodings) override;
 
  private:
   std::vector<TemplateProcessor> single_;
