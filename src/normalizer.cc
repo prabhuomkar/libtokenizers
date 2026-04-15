@@ -78,6 +78,63 @@ std::string Normalizer::NormalizeString(std::string input) { return ""; }
 
 NormalizerResult Normalizer::Normalize(NormalizerResult input) { return input; }
 
+NFCNormalizer::NFCNormalizer() {}
+
+NormalizerResult NFCNormalizer::Normalize(NormalizerResult input) {
+  UErrorCode error_code = U_ZERO_ERROR;
+  const icu::Normalizer2* normalizer =
+      icu::Normalizer2::getNFCInstance(error_code);
+  if (U_FAILURE(error_code) || !normalizer) {
+    throw std::runtime_error(
+        std::string("failed to get normalizer instance: ") +
+        u_errorName(error_code));
+  }
+
+  icu::UnicodeString normalized;
+  normalizer->normalize(input.normalized, normalized, error_code);
+  if (U_FAILURE(error_code)) {
+    throw std::runtime_error(std::string("failed to normalize string input: ") +
+                             u_errorName(error_code));
+  }
+
+  std::vector<std::pair<int, int>> remove_ops;
+  icu::StringCharacterIterator src_it(input.normalized);
+  icu::StringCharacterIterator dst_it(normalized);
+  int src_idx = 0;
+  int dst_idx = 0;
+  while (src_it.hasNext() && dst_it.hasNext()) {
+    UChar32 src_c = src_it.next32PostInc();
+    UChar32 dst_c = dst_it.next32PostInc();
+    if (src_c != dst_c) {
+      while (src_it.hasNext()) {
+        UChar32 next_src = src_it.current32();
+        if (u_charType(next_src) == U_NON_SPACING_MARK) {
+          remove_ops.emplace_back(src_idx + 1, -1);
+          src_it.next32PostInc();
+          src_idx++;
+        } else {
+          break;
+        }
+      }
+    }
+    src_idx++;
+    dst_idx++;
+  }
+
+  input.normalized = normalized;
+  transform_offsets(&input, remove_ops);
+  return input;
+}
+
+std::string NFCNormalizer::NormalizeString(std::string input) {
+  icu::UnicodeString unicode_input = icu::UnicodeString::fromUTF8(input);
+  NormalizerResult normalized = NormalizerResult(unicode_input);
+  normalized = Normalize(normalized);
+  std::string result;
+  normalized.normalized.toUTF8String(result);
+  return result;
+}
+
 BertNormalizer::BertNormalizer(bool clean_text, bool handle_chinese_chars,
                                bool strip_accents, bool lowercase)
     : clean_text_(clean_text),
@@ -154,7 +211,7 @@ void doStripAccents(NormalizerResult* input) {
         std::string("failed to get normalizer instance: ") +
         u_errorName(error_code));
   }
-  
+
   std::vector<std::pair<int, int>> expand_ops;
   icu::StringCharacterIterator expand_it(input->normalized);
   int char_idx = 0;
@@ -165,7 +222,7 @@ void doStripAccents(NormalizerResult* input) {
     int extra = decomposed.countChar32() - 1;
     if (extra >= 1) {
       expand_ops.emplace_back(char_idx, extra);
-    } 
+    }
   }
   transform_offsets(input, expand_ops);
 

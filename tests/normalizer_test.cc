@@ -9,6 +9,7 @@ using tokenizers::normalizers::BertNormalizer;
 using tokenizers::normalizers::isChineseChar;
 using tokenizers::normalizers::isControl;
 using tokenizers::normalizers::isWhitespace;
+using tokenizers::normalizers::NFCNormalizer;
 using tokenizers::normalizers::Normalizer;
 using tokenizers::normalizers::NormalizerResult;
 
@@ -28,6 +29,14 @@ TEST(NormalizerTest, EmptyInput) {
   Normalizer normalizer;
   NormalizerResult input = NormalizerResult(u8"");
   NormalizerResult expected_result = NormalizerResult(u8"", {});
+  assertNormalizerValues(normalizer.Normalize(input), expected_result);
+}
+
+TEST(NFCNormalizerTest, Normalization) {
+  NFCNormalizer normalizer;
+  NormalizerResult input = NormalizerResult(u8"Cafe\u0301");
+  NormalizerResult expected_result =
+      NormalizerResult(u8"Café", {{0, 1}, {1, 2}, {2, 3}, {3, 4}});
   assertNormalizerValues(normalizer.Normalize(input), expected_result);
 }
 

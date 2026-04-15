@@ -34,6 +34,14 @@ class Normalizer {
   virtual std::string NormalizeString(std::string input);
 };
 
+// NFC
+class NFCNormalizer : public Normalizer {
+ public:
+  explicit NFCNormalizer();
+  NormalizerResult Normalize(NormalizerResult input) override;
+  std::string NormalizeString(std::string input) override;
+};
+
 // BertNormalizer
 class BertNormalizer : public Normalizer {
  public:

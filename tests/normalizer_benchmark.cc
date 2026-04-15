@@ -10,8 +10,18 @@ using tokenizers::normalizers::BertNormalizer;
 using tokenizers::normalizers::isChineseChar;
 using tokenizers::normalizers::isControl;
 using tokenizers::normalizers::isWhitespace;
+using tokenizers::normalizers::NFCNormalizer;
 using tokenizers::normalizers::Normalizer;
 using tokenizers::normalizers::NormalizerResult;
+
+static void BM_NFCNormalizer(benchmark::State& state) { // NOLINT
+  NormalizerResult input = NormalizerResult(u8"Cafe\u0301");
+  NFCNormalizer normalizer;
+  for (auto _ : state) {
+    NormalizerResult output = normalizer.Normalize(input);
+    benchmark::DoNotOptimize(output);
+  }
+}
 
 static void BM_BertNormalizerNoOp(benchmark::State& state) { // NOLINT
   NormalizerResult input =
@@ -83,6 +93,7 @@ static void BM_BertNormalizerAllOpsString(benchmark::State& state) { // NOLINT
   }
 }
 
+BENCHMARK(BM_NFCNormalizer)->ThreadPerCpu();
 BENCHMARK(BM_BertNormalizerNoOp)->ThreadPerCpu();
 BENCHMARK(BM_BertNormalizerCleanText)->ThreadPerCpu();
 BENCHMARK(BM_BertNormalizerHandleChineseChars)->ThreadPerCpu();
