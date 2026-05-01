@@ -39,14 +39,9 @@ void TruncateEncoding(Encoding* encoding, int max_length, int stride,
   }
 
   if (max_length == 0) {
-    encoding->overflowing.emplace_back(*encoding);
     encoding->ids.clear();
     encoding->type_ids.clear();
     encoding->tokens.clear();
-    encoding->offsets.clear();
-    encoding->word_ids.clear();
-    encoding->special_tokens_mask.clear();
-    encoding->attention_mask.clear();
     return;
   }
 
@@ -78,38 +73,7 @@ void TruncateEncoding(Encoding* encoding, int max_length, int stride,
                                encoding->type_ids.begin() + ranges[0].second);
   new_encoding.tokens.assign(encoding->tokens.begin() + ranges[0].first,
                              encoding->tokens.begin() + ranges[0].second);
-  new_encoding.offsets.assign(encoding->offsets.begin() + ranges[0].first,
-                              encoding->offsets.begin() + ranges[0].second);
-  new_encoding.word_ids.assign(encoding->word_ids.begin() + ranges[0].first,
-                               encoding->word_ids.begin() + ranges[0].second);
-  new_encoding.special_tokens_mask.assign(
-      encoding->special_tokens_mask.begin() + ranges[0].first,
-      encoding->special_tokens_mask.begin() + ranges[0].second);
-  new_encoding.attention_mask.assign(
-      encoding->attention_mask.begin() + ranges[0].first,
-      encoding->attention_mask.begin() + ranges[0].second);
 
-  new_encoding.overflowing.reserve(ranges.size() - 1);
-  for (int i = 1; i < ranges.size(); i++) {
-    new_encoding.overflowing.emplace_back(Encoding(
-        std::vector<int>(encoding->ids.begin() + ranges[i].first,
-                         encoding->ids.begin() + ranges[i].second),
-        std::vector<int>(encoding->type_ids.begin() + ranges[i].first,
-                         encoding->type_ids.begin() + ranges[i].second),
-        std::vector<std::string>(encoding->tokens.begin() + ranges[i].first,
-                                 encoding->tokens.begin() + ranges[i].second),
-        std::vector<std::pair<int, int>>(
-            encoding->offsets.begin() + ranges[i].first,
-            encoding->offsets.begin() + ranges[i].second),
-        std::vector<std::optional<int>>(
-            encoding->word_ids.begin() + ranges[i].first,
-            encoding->word_ids.begin() + ranges[i].second),
-        std::vector<int>(
-            encoding->special_tokens_mask.begin() + ranges[i].first,
-            encoding->special_tokens_mask.begin() + ranges[i].second),
-        std::vector<int>(encoding->attention_mask.begin() + ranges[i].first,
-                         encoding->attention_mask.begin() + ranges[i].second)));
-  }
   *encoding = new_encoding;
 }
 
@@ -195,11 +159,6 @@ Padding::Padding(const PaddingDirection& direction,
 void PadEncoding(Encoding* encoding, int target_length, int pad_id,
                  int pad_type_id, const std::string& pad_token,
                  PaddingDirection direction) {
-  for (Encoding& overflow_encoding : encoding->overflowing) {
-    PadEncoding(&overflow_encoding, target_length, pad_id, pad_type_id,
-                pad_token, direction);
-  }
-
   if (encoding->ids.size() >= target_length) {
     return;
   }
@@ -211,27 +170,11 @@ void PadEncoding(Encoding* encoding, int target_length, int pad_id,
     encoding->type_ids.insert(encoding->type_ids.begin(), pad_length,
                               pad_type_id);
     encoding->tokens.insert(encoding->tokens.begin(), pad_length, pad_token);
-    encoding->offsets.insert(encoding->offsets.begin(), pad_length,
-                             std::make_pair(0, 0));
-    encoding->word_ids.insert(encoding->word_ids.begin(), pad_length,
-                              std::nullopt);
-    encoding->special_tokens_mask.insert(encoding->special_tokens_mask.begin(),
-                                         pad_length, 1);
-    encoding->attention_mask.insert(encoding->attention_mask.begin(),
-                                    pad_length, 0);
   } else {
     encoding->ids.insert(encoding->ids.end(), pad_length, pad_id);
     encoding->type_ids.insert(encoding->type_ids.end(), pad_length,
                               pad_type_id);
     encoding->tokens.insert(encoding->tokens.end(), pad_length, pad_token);
-    encoding->offsets.insert(encoding->offsets.end(), pad_length,
-                             std::make_pair(0, 0));
-    encoding->word_ids.insert(encoding->word_ids.end(), pad_length,
-                              std::nullopt);
-    encoding->special_tokens_mask.insert(encoding->special_tokens_mask.end(),
-                                         pad_length, 1);
-    encoding->attention_mask.insert(encoding->attention_mask.end(), pad_length,
-                                    0);
   }
 }
 

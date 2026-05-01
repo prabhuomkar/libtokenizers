@@ -44,9 +44,8 @@ std::vector<Encoding> TemplateProcessing::ProcessEncodings(
     if (processor.category == "SpecialToken") {
       auto it = special_tokens_.find(processor.id);
       if (it != special_tokens_.end()) {
-        result.emplace_back(Encoding({it->second}, {processor.type_id},
-                                     {processor.id}, {{0, 0}}, {std::nullopt},
-                                     {1}, {1}));
+        result.emplace_back(
+            Encoding({it->second}, {processor.type_id}, {processor.id}));
       }
     } else if (processor.category == "Sequence") {
       result.emplace_back(std::move(encodings[seq_id]));

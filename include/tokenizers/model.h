@@ -17,8 +17,6 @@ namespace models {
 class Model {
  public:
   Model();
-  virtual std::vector<Token> Tokenize(const icu::UnicodeString& input,
-                                      const std::pair<int, int>& offset);
   virtual std::vector<Token> Tokenize(const icu::UnicodeString& input);
   virtual std::vector<Token> TokenizeString(const std::string& input);
   virtual std::optional<std::string> IdToToken(int id);
@@ -29,11 +27,9 @@ class Model {
 class WordPiece : public Model {
  public:
   explicit WordPiece(std::unordered_map<std::string, int> vocab,
-                    std::string unk_token = "[UNK]",
-                    std::string continuing_subword_prefix = "##",
+                     std::string unk_token = "[UNK]",
+                     std::string continuing_subword_prefix = "##",
                      int max_input_chars_per_word = 100);
-  std::vector<Token> Tokenize(const icu::UnicodeString& input,
-                              const std::pair<int, int>& offset) override;
   std::vector<Token> Tokenize(const icu::UnicodeString& input) override;
   std::vector<Token> TokenizeString(const std::string& input) override;
   std::optional<std::string> IdToToken(int id) override;

@@ -94,8 +94,7 @@ static void BM_BertPreTokenizerAllOpsString(benchmark::State& state) { // NOLINT
   BertPreTokenizer pre_tokenizer;
   std::string input = u8"Hey friend!  野  口  里  佳  Noguchi Rika";
   for (auto _ : state) {
-    std::vector<std::pair<std::string, std::pair<int, int>>> output =
-        pre_tokenizer.PreTokenizeString(input);
+    std::vector<std::string> output = pre_tokenizer.PreTokenizeString(input);
     benchmark::DoNotOptimize(output);
   }
 }

@@ -25,9 +25,8 @@ static void BM_TemplateProcessorSingle(benchmark::State& state) { // NOLINT
           TemplateProcessor("SpecialToken", 1, "[SEP]"),
       },
       std::unordered_map<std::string, int>({{"[CLS]", 100}, {"[SEP]", 101}}));
-  std::vector<Encoding> input = {Encoding({200, 201}, {0, 0},
-                                          {"hello", "world"}, {{0, 0}, {0, 0}},
-                                          {}, {0, 0}, {1, 1})};
+  std::vector<Encoding> input = {
+      Encoding({200, 201}, {0, 0}, {"hello", "world"})};
   for (auto _ : state) {
     std::vector<Encoding> output = post_processor.ProcessEncodings(input);
     benchmark::DoNotOptimize(output);
@@ -48,10 +47,8 @@ static void BM_TemplateProcessorPair(benchmark::State& state) { // NOLINT
       },
       std::unordered_map<std::string, int>({{"[CLS]", 100}, {"[SEP]", 101}}));
   std::vector<Encoding> input = {
-      Encoding({200, 201}, {0, 0}, {"hello", "world"}, {{0, 0}, {0, 0}}, {},
-               {0, 0}, {1, 1}),
-      Encoding({300, 301}, {1, 1}, {"martin", "garrix"}, {{0, 0}, {0, 0}}, {},
-               {0, 0}, {1, 1})};
+      Encoding({200, 201}, {0, 0}, {"hello", "world"}),
+      Encoding({300, 301}, {1, 1}, {"martin", "garrix"})};
   for (auto _ : state) {
     std::vector<Encoding> output = post_processor.ProcessEncodings(input);
     benchmark::DoNotOptimize(output);

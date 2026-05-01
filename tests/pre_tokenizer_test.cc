@@ -15,15 +15,11 @@ using tokenizers::pre_tokenizers::SplitDelimiterBehavior;
 void assertPreTokenizerValues(const PreTokenizerResult& got,
                               const PreTokenizerResult& expected) {
   ASSERT_EQ(got.pre_tokenized.size(), expected.pre_tokenized.size());
-  ASSERT_EQ(got.offsets.size(), expected.offsets.size());
   for (int i = 0; i < got.pre_tokenized.size(); i++) {
     std::string got_str, expected_str;
     got.pre_tokenized[i].toUTF8String(got_str);
     expected.pre_tokenized[i].toUTF8String(expected_str);
     ASSERT_EQ(got_str, expected_str);
-  }
-  for (int i = 0; i < got.offsets.size(); i++) {
-    ASSERT_EQ(got.offsets[i], expected.offsets[i]);
   }
 }
 
@@ -36,8 +32,7 @@ TEST(PreTokenizerTest, SplitRemoved) {
   PreTokenizerResult expected =
       PreTokenizerResult({icu::UnicodeString::fromUTF8(u8"the"),
                           icu::UnicodeString::fromUTF8(u8"final"),
-                          icu::UnicodeString::fromUTF8(u8"countdown")},
-                         {{0, 3}, {4, 9}, {11, 20}});
+                          icu::UnicodeString::fromUTF8(u8"countdown")});
   assertPreTokenizerValues(result, expected);
 }
 
@@ -52,8 +47,7 @@ TEST(PreTokenizerTest, SplitIsolated) {
        icu::UnicodeString::fromUTF8(u8"-"),
        icu::UnicodeString::fromUTF8(u8"final"),
        icu::UnicodeString::fromUTF8(u8"-"), icu::UnicodeString::fromUTF8(u8"-"),
-       icu::UnicodeString::fromUTF8(u8"countdown")},
-      {{0, 3}, {3, 4}, {4, 9}, {9, 10}, {10, 11}, {11, 20}});
+       icu::UnicodeString::fromUTF8(u8"countdown")});
   assertPreTokenizerValues(result, expected);
 }
 
@@ -67,8 +61,7 @@ TEST(PreTokenizerTest, SplitMergedWithPrevious) {
       PreTokenizerResult({icu::UnicodeString::fromUTF8(u8"the-"),
                           icu::UnicodeString::fromUTF8(u8"final-"),
                           icu::UnicodeString::fromUTF8(u8"-"),
-                          icu::UnicodeString::fromUTF8(u8"countdown")},
-                         {{0, 4}, {4, 10}, {10, 11}, {11, 20}});
+                          icu::UnicodeString::fromUTF8(u8"countdown")});
   assertPreTokenizerValues(result, expected);
 }
 
@@ -82,8 +75,7 @@ TEST(PreTokenizerTest, SplitMergedWithNext) {
       PreTokenizerResult({icu::UnicodeString::fromUTF8(u8"the"),
                           icu::UnicodeString::fromUTF8(u8"-final"),
                           icu::UnicodeString::fromUTF8(u8"-"),
-                          icu::UnicodeString::fromUTF8(u8"-countdown")},
-                         {{0, 3}, {3, 9}, {9, 10}, {10, 20}});
+                          icu::UnicodeString::fromUTF8(u8"-countdown")});
   assertPreTokenizerValues(result, expected);
 }
 
@@ -107,16 +99,7 @@ TEST(BertPreTokenizerTest, WhitespaceChars) {
        icu::UnicodeString::fromUTF8(u8"are"),
        icu::UnicodeString::fromUTF8(u8"you"),
        icu::UnicodeString::fromUTF8(u8"?"), icu::UnicodeString::fromUTF8(u8"!"),
-       icu::UnicodeString::fromUTF8(u8"?")},
-      {{0, 3},
-       {4, 10},
-       {10, 11},
-       {16, 19},
-       {20, 23},
-       {24, 27},
-       {27, 28},
-       {28, 29},
-       {29, 30}});
+       icu::UnicodeString::fromUTF8(u8"?")});
   assertPreTokenizerValues(pre_tokenizer.PreTokenize(input), expected_result);
 }
 
@@ -124,14 +107,13 @@ TEST(BertPreTokenizerTest, ChineseChars) {
   BertPreTokenizer pre_tokenizer;
   PreTokenizerResult input = PreTokenizerResult(
       icu::UnicodeString::fromUTF8(u8" 野  口  里  佳  Noguchi Rika"));
-  PreTokenizerResult expected_result = PreTokenizerResult(
-      {icu::UnicodeString::fromUTF8(u8"野"),
-       icu::UnicodeString::fromUTF8(u8"口"),
-       icu::UnicodeString::fromUTF8(u8"里"),
-       icu::UnicodeString::fromUTF8(u8"佳"),
-       icu::UnicodeString::fromUTF8(u8"Noguchi"),
-       icu::UnicodeString::fromUTF8(u8"Rika")},
-      {{1, 2}, {4, 5}, {7, 8}, {10, 11}, {13, 20}, {21, 25}});
+  PreTokenizerResult expected_result =
+      PreTokenizerResult({icu::UnicodeString::fromUTF8(u8"野"),
+                          icu::UnicodeString::fromUTF8(u8"口"),
+                          icu::UnicodeString::fromUTF8(u8"里"),
+                          icu::UnicodeString::fromUTF8(u8"佳"),
+                          icu::UnicodeString::fromUTF8(u8"Noguchi"),
+                          icu::UnicodeString::fromUTF8(u8"Rika")});
   assertPreTokenizerValues(pre_tokenizer.PreTokenize(input), expected_result);
 }
 
@@ -148,15 +130,6 @@ TEST(BertPreTokenizerTest, AllOptions) {
                           icu::UnicodeString::fromUTF8(u8"里"),
                           icu::UnicodeString::fromUTF8(u8"佳"),
                           icu::UnicodeString::fromUTF8(u8"Noguchi"),
-                          icu::UnicodeString::fromUTF8(u8"Rika")},
-                         {{0, 3},
-                          {4, 10},
-                          {10, 11},
-                          {13, 14},
-                          {16, 17},
-                          {19, 20},
-                          {22, 23},
-                          {25, 32},
-                          {33, 37}});
+                          icu::UnicodeString::fromUTF8(u8"Rika")});
   assertPreTokenizerValues(pre_tokenizer.PreTokenize(input), expected_result);
 }

@@ -15,11 +15,6 @@ namespace models {
 
 Model::Model() {}
 
-std::vector<Token> Model::Tokenize(const icu::UnicodeString& input,
-                                   const std::pair<int, int>& offset) {
-  return {};
-}
-
 std::vector<Token> Model::Tokenize(const icu::UnicodeString& input) {
   return {};
 }
@@ -35,8 +30,8 @@ std::optional<int> Model::TokenToId(const std::string& token) {
 }
 
 WordPiece::WordPiece(std::unordered_map<std::string, int> vocab,
-                    std::string unk_token,
-                    std::string continuing_subword_prefix,
+                     std::string unk_token,
+                     std::string continuing_subword_prefix,
                      int max_input_chars_per_word)
     : vocab_(std::move(vocab)),
       unk_token_(std::move(unk_token)),
@@ -47,11 +42,10 @@ WordPiece::WordPiece(std::unordered_map<std::string, int> vocab,
   }
 }
 
-std::vector<Token> WordPiece::Tokenize(const icu::UnicodeString& input,
-                                       const std::pair<int, int>& offset) {
+std::vector<Token> WordPiece::Tokenize(const icu::UnicodeString& input) {
   int input_len = input.countChar32();
   if (input_len > max_input_chars_per_word_) {
-    return {Token(unk_token_, vocab_.at(unk_token_), offset, false)};
+    return {Token(unk_token_, vocab_.at(unk_token_), false)};
   }
 
   std::vector<Token> tokens;
@@ -65,17 +59,15 @@ std::vector<Token> WordPiece::Tokenize(const icu::UnicodeString& input,
     while (start < end) {
       icu::UnicodeString input_substr = input.tempSubStringBetween(start, end);
       std::string input_substr_str;
-      
+
       if (start > 0) {
         input_substr_str = continuing_subword_prefix_;
-      } 
+      }
       input_substr.toUTF8String(input_substr_str);
 
       auto it = vocab_.find(input_substr_str);
       if (it != vocab_.end()) {
-        tokens.emplace_back(Token(input_substr_str, it->second,
-                                  {offset.first + start, offset.first + end},
-                                  start > 0));
+        tokens.emplace_back(Token(input_substr_str, it->second, start > 0));
         found = true;
         break;
       }
@@ -91,16 +83,10 @@ std::vector<Token> WordPiece::Tokenize(const icu::UnicodeString& input,
   }
 
   if (is_bad) {
-    tokens.emplace_back(Token(unk_token_, vocab_.at(unk_token_),
-                              {offset.first + start, offset.first + input_len},
-                              false));
+    tokens.emplace_back(Token(unk_token_, vocab_.at(unk_token_), false));
   }
 
   return tokens;
-}
-
-std::vector<Token> WordPiece::Tokenize(const icu::UnicodeString& input) {
-  return Tokenize(input, {0, input.countChar32()});
 }
 
 std::vector<Token> WordPiece::TokenizeString(const std::string& input) {

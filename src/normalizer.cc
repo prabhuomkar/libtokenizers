@@ -17,60 +17,9 @@ namespace tokenizers {
 
 namespace normalizers {
 
-// When transforming characters of input after normalization
-// adjust the removal or addition of characters in the offsets
-// based on the operations performed on the input.
-// -1 -> erase offset at index
-// 0 -> insert offset of index before itself
-// 1 -> insert offset of index after itself
-// 2 -> insert offset of index before and after itself
-void transform_offsets(NormalizerResult* input,
-                       const std::vector<std::pair<int, int>>& ops) {
-  int adjusted_idx = 0;
-  for (const std::pair<int, int>& op : ops) {
-    if (op.second == -1) {
-      input->offsets.erase(input->offsets.begin() + op.first + adjusted_idx);
-      adjusted_idx -= 1;
-    } else if (op.second == 0) {
-      std::pair<int, int> cur_offset = input->offsets[op.first + adjusted_idx];
-      input->offsets.insert(input->offsets.begin() + op.first + adjusted_idx,
-                            cur_offset);
-      adjusted_idx += 1;
-    } else if (op.second == 1) {
-      std::pair<int, int> cur_offset = input->offsets[op.first + adjusted_idx];
-      input->offsets.insert(
-          input->offsets.begin() + op.first + 1 + adjusted_idx, cur_offset);
-      adjusted_idx += 1;
-    } else if (op.second == 2) {
-      std::pair<int, int> cur_offset = input->offsets[op.first + adjusted_idx];
-      input->offsets.insert(input->offsets.begin() + op.first + adjusted_idx,
-                            cur_offset);
-      input->offsets.insert(
-          input->offsets.begin() + op.first + 1 + adjusted_idx, cur_offset);
-      adjusted_idx += 2;
-    }
-  }
-}
-
 NormalizerResult::NormalizerResult(const icu::UnicodeString& normalized,
                                    bool pre_normalized)
-    : normalized(normalized), pre_normalized(pre_normalized) {
-  offsets.reserve(normalized.countChar32());
-  icu::StringCharacterIterator it(normalized);
-  for (it.first(); it.hasNext();) {
-    int start = it.getIndex();
-    it.next32PostInc();
-    int end = it.getIndex();
-    offsets.emplace_back(start, end);
-  }
-}
-
-NormalizerResult::NormalizerResult(
-    const icu::UnicodeString& normalized,
-    const std::vector<std::pair<int, int>>& offsets, bool pre_normalized)
-    : normalized(normalized),
-      offsets(offsets),
-      pre_normalized(pre_normalized) {}
+    : normalized(normalized), pre_normalized(pre_normalized) {}
 
 Normalizer::Normalizer() {}
 
@@ -97,32 +46,7 @@ NormalizerResult NFCNormalizer::Normalize(NormalizerResult input) {
                              u_errorName(error_code));
   }
 
-  std::vector<std::pair<int, int>> remove_ops;
-  icu::StringCharacterIterator src_it(input.normalized);
-  icu::StringCharacterIterator dst_it(normalized);
-  int src_idx = 0;
-  int dst_idx = 0;
-  while (src_it.hasNext() && dst_it.hasNext()) {
-    UChar32 src_c = src_it.next32PostInc();
-    UChar32 dst_c = dst_it.next32PostInc();
-    if (src_c != dst_c) {
-      while (src_it.hasNext()) {
-        UChar32 next_src = src_it.current32();
-        if (u_charType(next_src) == U_NON_SPACING_MARK) {
-          remove_ops.emplace_back(src_idx + 1, -1);
-          src_it.next32PostInc();
-          src_idx++;
-        } else {
-          break;
-        }
-      }
-    }
-    src_idx++;
-    dst_idx++;
-  }
-
   input.normalized = normalized;
-  transform_offsets(&input, remove_ops);
   return input;
 }
 
@@ -170,36 +94,30 @@ std::string BertNormalizer::NormalizeString(std::string input) {
 void doCleanText(NormalizerResult* input) {
   icu::UnicodeString result;
   icu::StringCharacterIterator it(input->normalized);
-  std::vector<std::pair<int, int>> ops;
   for (it.first(); it.hasNext();) {
     UChar32 c = it.next32PostInc();
     if (c == 0x0000 || c == 0xFFFD || isControl(c)) {
-      ops.emplace_back(it.getIndex() - 1, -1);
       continue;
     }
     result.append(isWhitespace(c) ? ' ' : c);
   }
   input->normalized = result;
-  transform_offsets(input, ops);
 }
 
 void doHandleChineseChars(NormalizerResult* input) {
   icu::UnicodeString result;
   icu::StringCharacterIterator it(input->normalized);
-  std::vector<std::pair<int, int>> ops;
   for (it.first(); it.hasNext();) {
     UChar32 c = it.next32PostInc();
     if (isChineseChar(c)) {
       result.append(' ');
       result.append(c);
       result.append(' ');
-      ops.emplace_back(it.getIndex() - 1, 2);
     } else {
       result.append(c);
     }
   }
   input->normalized = result;
-  transform_offsets(input, ops);
 }
 
 void doStripAccents(NormalizerResult* input) {
@@ -212,20 +130,6 @@ void doStripAccents(NormalizerResult* input) {
         u_errorName(error_code));
   }
 
-  std::vector<std::pair<int, int>> expand_ops;
-  icu::StringCharacterIterator expand_it(input->normalized);
-  int char_idx = 0;
-  for (expand_it.first(); expand_it.hasNext(); char_idx++) {
-    UChar32 c = expand_it.next32PostInc();
-    icu::UnicodeString decomposed;
-    normalizer->normalize(icu::UnicodeString(c), decomposed, error_code);
-    int extra = decomposed.countChar32() - 1;
-    if (extra >= 1) {
-      expand_ops.emplace_back(char_idx, extra);
-    }
-  }
-  transform_offsets(input, expand_ops);
-
   icu::UnicodeString normalized;
   normalizer->normalize(input->normalized, normalized, error_code);
   if (U_FAILURE(error_code)) {
@@ -234,20 +138,15 @@ void doStripAccents(NormalizerResult* input) {
   }
 
   icu::UnicodeString result;
-  std::vector<std::pair<int, int>> remove_ops;
   icu::StringCharacterIterator remove_it(normalized);
-  char_idx = 0;
-  for (remove_it.first(); remove_it.hasNext(); char_idx++) {
+  for (remove_it.first(); remove_it.hasNext();) {
     UChar32 c = remove_it.next32PostInc();
-    if (u_charType(c) == U_NON_SPACING_MARK) {
-      remove_ops.emplace_back(char_idx, -1);
-    } else {
+    if (u_charType(c) != U_NON_SPACING_MARK) {
       result.append(c);
     }
   }
 
   input->normalized = result;
-  transform_offsets(input, remove_ops);
 }
 
 void doLowercase(NormalizerResult* input) { input->normalized.toLower(); }

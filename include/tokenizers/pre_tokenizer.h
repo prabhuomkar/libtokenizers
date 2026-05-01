@@ -17,14 +17,8 @@ class PreTokenizerResult {
  public:
   PreTokenizerResult();
   explicit PreTokenizerResult(const icu::UnicodeString& pre_tokenized);
-  PreTokenizerResult(
-      const std::vector<icu::UnicodeString>& pre_tokenized,
-      const std::vector<std::vector<std::pair<int, int>>>& char_offsets);
-  PreTokenizerResult(const std::vector<icu::UnicodeString>& pre_tokenized,
-                     const std::vector<std::pair<int, int>>& offsets);
+  PreTokenizerResult(const std::vector<icu::UnicodeString>& pre_tokenized);
   std::vector<icu::UnicodeString> pre_tokenized;
-  std::vector<std::vector<std::pair<int, int>>> char_offsets;
-  std::vector<std::pair<int, int>> offsets;
   bool pre_pre_tokenized;
 };
 
@@ -43,8 +37,7 @@ class PreTokenizer {
  public:
   PreTokenizer();
   virtual PreTokenizerResult PreTokenize(const PreTokenizerResult& input);
-  virtual std::vector<std::pair<std::string, std::pair<int, int>>>
-  PreTokenizeString(const std::string& input);
+  virtual std::vector<std::string> PreTokenizeString(const std::string& input);
 };
 
 // BertPreTokenizer
@@ -52,8 +45,7 @@ class BertPreTokenizer : public PreTokenizer {
  public:
   explicit BertPreTokenizer();
   PreTokenizerResult PreTokenize(const PreTokenizerResult& input) override;
-  std::vector<std::pair<std::string, std::pair<int, int>>> PreTokenizeString(
-      const std::string& input) override;
+  std::vector<std::string> PreTokenizeString(const std::string& input) override;
 };
 
 } // namespace pre_tokenizers

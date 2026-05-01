@@ -22,10 +22,6 @@ void assertAddedVocabularyValues(
     got[i].normalized.toUTF8String(got_str);
     expected[i].normalized.toUTF8String(expected_str);
     ASSERT_EQ(got_str, expected_str);
-    ASSERT_EQ(got[i].offsets.size(), expected[i].offsets.size());
-    for (int j = 0; j < got[i].offsets.size(); j++) {
-      ASSERT_EQ(got[i].offsets[j], expected[i].offsets[j]);
-    }
     ASSERT_EQ(got[i].pre_normalized, expected[i].pre_normalized);
   }
 }
@@ -62,9 +58,8 @@ TEST(AddedVocabularyFindSplits, SpecialToken) {
   AddedVocabulary added_vocabulary(
       {AddedToken(0, "[MASK]", false, false, false, false, true)});
   std::vector<NormalizerResult> expected_result = {
-      NormalizerResult(icu::UnicodeString("Capital of India is "),
-                       getVec(0, 20)),
-      NormalizerResult(icu::UnicodeString("[MASK]"), getVec(20, 26), true)};
+      NormalizerResult(icu::UnicodeString("Capital of India is ")),
+      NormalizerResult(icu::UnicodeString("[MASK]"), true)};
   NormalizerResult input =
       NormalizerResult(icu::UnicodeString("Capital of India is [MASK]"));
   std::vector<NormalizerResult> got_result = added_vocabulary.FindSplits(input);
@@ -75,9 +70,9 @@ TEST(AddedVocabularyFindSplits, SingleWord) {
   AddedVocabulary added_vocabulary(
       {AddedToken(0, "India", true, false, false, false, false)});
   std::vector<NormalizerResult> expected_result = {
-      NormalizerResult(icu::UnicodeString("Capital of "), getVec(0, 11)),
-      NormalizerResult(icu::UnicodeString("India"), getVec(11, 16)),
-      NormalizerResult(icu::UnicodeString(" is [MASK]"), getVec(16, 26))};
+      NormalizerResult(icu::UnicodeString("Capital of ")),
+      NormalizerResult(icu::UnicodeString("India")),
+      NormalizerResult(icu::UnicodeString(" is [MASK]"))};
   NormalizerResult input =
       NormalizerResult(icu::UnicodeString("Capital of India is [MASK]"));
   std::vector<NormalizerResult> got_result = added_vocabulary.FindSplits(input);
@@ -85,14 +80,14 @@ TEST(AddedVocabularyFindSplits, SingleWord) {
 
   added_vocabulary = AddedVocabulary(
       {AddedToken(0, "India", true, false, false, false, false)});
-  expected_result = {NormalizerResult(
-      icu::UnicodeString("Capital of MyIndia is [MASK]"), getVec(0, 28))};
+  expected_result = {
+      NormalizerResult(icu::UnicodeString("Capital of MyIndia is [MASK]"))};
   got_result = added_vocabulary.FindSplits(
       NormalizerResult(icu::UnicodeString("Capital of MyIndia is [MASK]")));
   assertAddedVocabularyValues(got_result, expected_result);
 
-  expected_result = {NormalizerResult(
-      icu::UnicodeString("Capital of Indias is [MASK]"), getVec(0, 27))};
+  expected_result = {
+      NormalizerResult(icu::UnicodeString("Capital of Indias is [MASK]"))};
   got_result = added_vocabulary.FindSplits(
       NormalizerResult(icu::UnicodeString("Capital of Indias is [MASK]")));
   assertAddedVocabularyValues(got_result, expected_result);
@@ -102,9 +97,9 @@ TEST(AddedVocabularyFindSplits, LStrip) {
   AddedVocabulary added_vocabulary(
       {AddedToken(0, "India", false, true, false, false, false)});
   std::vector<NormalizerResult> expected_result = {
-      NormalizerResult(icu::UnicodeString("Capital of"), getVec(0, 10)),
-      NormalizerResult(icu::UnicodeString(" India"), getVec(10, 16)),
-      NormalizerResult(icu::UnicodeString(" is [MASK]"), getVec(16, 26))};
+      NormalizerResult(icu::UnicodeString("Capital of")),
+      NormalizerResult(icu::UnicodeString(" India")),
+      NormalizerResult(icu::UnicodeString(" is [MASK]"))};
   NormalizerResult input =
       NormalizerResult(icu::UnicodeString("Capital of India is [MASK]"));
   std::vector<NormalizerResult> got_result = added_vocabulary.FindSplits(input);
@@ -115,9 +110,9 @@ TEST(AddedVocabularyFindSplits, RStrip) {
   AddedVocabulary added_vocabulary(
       {AddedToken(0, "India", false, false, true, false, false)});
   std::vector<NormalizerResult> expected_result = {
-      NormalizerResult(icu::UnicodeString("Capital of "), getVec(0, 11)),
-      NormalizerResult(icu::UnicodeString("India "), getVec(11, 17)),
-      NormalizerResult(icu::UnicodeString("is [MASK]"), getVec(17, 26))};
+      NormalizerResult(icu::UnicodeString("Capital of ")),
+      NormalizerResult(icu::UnicodeString("India ")),
+      NormalizerResult(icu::UnicodeString("is [MASK]"))};
   NormalizerResult input =
       NormalizerResult(icu::UnicodeString("Capital of India is [MASK]"));
   std::vector<NormalizerResult> got_result = added_vocabulary.FindSplits(input);
@@ -128,9 +123,9 @@ TEST(AddedVocabularyFindSplits, LStripAndRStrip) {
   AddedVocabulary added_vocabulary(
       {AddedToken(0, "India", false, true, true, false, false)});
   std::vector<NormalizerResult> expected_result = {
-      NormalizerResult(icu::UnicodeString("Capital of"), getVec(0, 10)),
-      NormalizerResult(icu::UnicodeString(" India "), getVec(10, 17)),
-      NormalizerResult(icu::UnicodeString("is [MASK]"), getVec(17, 26))};
+      NormalizerResult(icu::UnicodeString("Capital of")),
+      NormalizerResult(icu::UnicodeString(" India ")),
+      NormalizerResult(icu::UnicodeString("is [MASK]"))};
   NormalizerResult input =
       NormalizerResult(icu::UnicodeString("Capital of India is [MASK]"));
   std::vector<NormalizerResult> got_result = added_vocabulary.FindSplits(input);

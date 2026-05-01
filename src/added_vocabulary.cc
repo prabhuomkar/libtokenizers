@@ -55,12 +55,11 @@ std::vector<NormalizerResult> AddedVocabulary::FindSplits(
     const NormalizerResult& input) {
   std::vector<NormalizerResult> splits;
   const icu::UnicodeString& input_normalized = input.normalized;
-  const std::vector<std::pair<int, int>>& input_offsets = input.offsets;
 
   std::vector<std::pair<int, int>> matches =
       FindMatches(input_normalized, patterns_);
 
-  int total_len = input_normalized.countChar32();
+  int total_len = input_normalized.length();
   int start_offset = 0;
   for (const std::pair<int, int>& match : matches) {
     int start = match.first;
@@ -78,46 +77,41 @@ std::vector<NormalizerResult> AddedVocabulary::FindSplits(
 
     if (token.single_word) {
       bool start_space =
-          start == 0 || input_normalized.charAt(start - 1) == ' ';
+          start == 0 || input_normalized.char32At(start - 1) == ' ';
       bool stop_space =
-          stop == total_len || input_normalized.charAt(stop) == ' ';
+          stop == total_len || input_normalized.char32At(stop) == ' ';
       if (!start_space || !stop_space) {
         continue;
       }
     }
 
     if (token.lstrip) {
-      while (start > 0 && u_isUWhiteSpace(input_normalized.charAt(start - 1))) {
+      while (start > 0 &&
+             u_isUWhiteSpace(input_normalized.char32At(start - 1))) {
         --start;
       }
     }
 
     if (token.rstrip) {
       while (stop < total_len &&
-             u_isUWhiteSpace(input_normalized.charAt(stop))) {
+             u_isUWhiteSpace(input_normalized.char32At(stop))) {
         ++stop;
       }
     }
 
     if (start_offset < start) {
       splits.emplace_back(NormalizerResult(
-          input_normalized.tempSubStringBetween(start_offset, start),
-          std::vector<std::pair<int, int>>(input_offsets.begin() + start_offset,
-                                           input_offsets.begin() + start)));
+          input_normalized.tempSubStringBetween(start_offset, start)));
     }
-    splits.emplace_back(NormalizerResult(
-        input_normalized.tempSubStringBetween(start, stop),
-        std::vector<std::pair<int, int>>(input_offsets.begin() + start,
-                                         input_offsets.begin() + stop),
-        token.special_token));
+    splits.emplace_back(
+        NormalizerResult(input_normalized.tempSubStringBetween(start, stop),
+                         token.special_token));
     start_offset = stop;
   }
 
   if (start_offset < total_len) {
     splits.emplace_back(NormalizerResult(
-        input_normalized.tempSubStringBetween(start_offset, total_len),
-        std::vector<std::pair<int, int>>(input_offsets.begin() + start_offset,
-                                         input_offsets.end())));
+        input_normalized.tempSubStringBetween(start_offset, total_len)));
   }
 
   return splits;

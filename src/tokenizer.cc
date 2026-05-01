@@ -222,16 +222,6 @@ Encoding Tokenizer::Encode(const std::string& input, bool add_special_tokens) {
                            enc.tokens.end());
     encoding.type_ids.insert(encoding.type_ids.end(), enc.type_ids.begin(),
                              enc.type_ids.end());
-    encoding.offsets.insert(encoding.offsets.end(), enc.offsets.begin(),
-                            enc.offsets.end());
-    encoding.word_ids.insert(encoding.word_ids.end(), enc.word_ids.begin(),
-                             enc.word_ids.end());
-    encoding.special_tokens_mask.insert(encoding.special_tokens_mask.end(),
-                                        enc.special_tokens_mask.begin(),
-                                        enc.special_tokens_mask.end());
-    encoding.attention_mask.insert(encoding.attention_mask.end(),
-                                   enc.attention_mask.begin(),
-                                   enc.attention_mask.end());
   }
   return encoding;
 }
@@ -260,16 +250,6 @@ Encoding Tokenizer::Encode(const std::pair<std::string, std::string>& input,
                            enc.tokens.end());
     encoding.type_ids.insert(encoding.type_ids.end(), enc.type_ids.begin(),
                              enc.type_ids.end());
-    encoding.offsets.insert(encoding.offsets.end(), enc.offsets.begin(),
-                            enc.offsets.end());
-    encoding.word_ids.insert(encoding.word_ids.end(), enc.word_ids.begin(),
-                             enc.word_ids.end());
-    encoding.special_tokens_mask.insert(encoding.special_tokens_mask.end(),
-                                        enc.special_tokens_mask.begin(),
-                                        enc.special_tokens_mask.end());
-    encoding.attention_mask.insert(encoding.attention_mask.end(),
-                                   enc.attention_mask.begin(),
-                                   enc.attention_mask.end());
   }
   return encoding;
 }
@@ -317,9 +297,7 @@ Encoding Tokenizer::EncodeSingleSequence(icu::UnicodeString* unicode_input,
   std::vector<pre_tokenizers::PreTokenizerResult> pre_tokenized_splits;
   for (const normalizers::NormalizerResult& split : normalized_splits) {
     pre_tokenizers::PreTokenizerResult pre_tokenized =
-        pre_tokenizers::PreTokenizerResult(
-            {split.normalized},
-            std::vector<std::vector<std::pair<int, int>>>({{split.offsets}}));
+        pre_tokenizers::PreTokenizerResult({split.normalized});
     pre_tokenized.pre_pre_tokenized = split.pre_normalized;
     pre_tokenized_splits.emplace_back(pre_tokenized);
   }
@@ -336,17 +314,12 @@ Encoding Tokenizer::EncodeSingleSequence(icu::UnicodeString* unicode_input,
     for (const pre_tokenizers::PreTokenizerResult& pre_tokenized :
          pre_tokenized_splits) {
       for (int i = 0; i < pre_tokenized.pre_tokenized.size(); i++) {
-        std::vector<Token> tokens = model->Tokenize(
-            pre_tokenized.pre_tokenized[i], pre_tokenized.offsets[i]);
+        std::vector<Token> tokens =
+            model->Tokenize(pre_tokenized.pre_tokenized[i]);
         for (const Token& token : tokens) {
           encoding.ids.emplace_back(token.id);
           encoding.tokens.emplace_back(token.value);
           encoding.type_ids.emplace_back(type_id);
-          encoding.offsets.emplace_back(token.offsets);
-          encoding.word_ids.emplace_back(
-              token.is_continuing_subword ? word_id : ++word_id);
-          encoding.special_tokens_mask.emplace_back(0);
-          encoding.attention_mask.emplace_back(1);
         }
       }
     }
