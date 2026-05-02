@@ -17,7 +17,10 @@ class PreTokenizerResult {
  public:
   PreTokenizerResult();
   explicit PreTokenizerResult(const icu::UnicodeString& pre_tokenized);
-  PreTokenizerResult(const std::vector<icu::UnicodeString>& pre_tokenized);
+  explicit PreTokenizerResult(
+      const std::vector<icu::UnicodeString>& pre_tokenized);
+  PreTokenizerResult(const icu::UnicodeString& pre_tokenized,
+                     bool pre_pre_tokenized);
   std::vector<icu::UnicodeString> pre_tokenized;
   bool pre_pre_tokenized;
 };

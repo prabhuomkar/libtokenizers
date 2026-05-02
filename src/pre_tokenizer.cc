@@ -16,14 +16,19 @@ namespace tokenizers {
 
 namespace pre_tokenizers {
 
-PreTokenizerResult::PreTokenizerResult() : pre_tokenized({}) {}
+PreTokenizerResult::PreTokenizerResult()
+    : pre_tokenized({}), pre_pre_tokenized(false) {}
 
 PreTokenizerResult::PreTokenizerResult(const icu::UnicodeString& pre_tokenized)
-    : pre_tokenized({pre_tokenized}) {}
+    : pre_tokenized({pre_tokenized}), pre_pre_tokenized(false) {}
 
 PreTokenizerResult::PreTokenizerResult(
     const std::vector<icu::UnicodeString>& pre_tokenized)
-    : pre_tokenized(pre_tokenized) {}
+    : pre_tokenized(pre_tokenized), pre_pre_tokenized(false) {}
+
+PreTokenizerResult::PreTokenizerResult(const icu::UnicodeString& pre_tokenized,
+                                       bool pre_pre_tokenized)
+    : pre_tokenized({pre_tokenized}), pre_pre_tokenized(pre_pre_tokenized) {}
 
 // When splitting on '-' for example, with input "the-final--countdown":
 // Removed => [ "the", "", "final", "", "", "countdown" ]

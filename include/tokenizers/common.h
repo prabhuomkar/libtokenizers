@@ -33,7 +33,7 @@ class Token {
   bool is_continuing_subword;
 };
 
-inline std::string get_string_or_default(simdjson::ondemand::value&& val,
+inline std::string get_string_or_default(simdjson::ondemand::value& val,
                                          std::string_view key,
                                          std::string_view def = "") {
   auto result = val[key].get_string();
@@ -41,13 +41,13 @@ inline std::string get_string_or_default(simdjson::ondemand::value&& val,
                                              : std::string(def);
 }
 
-inline bool get_bool_or_default(simdjson::ondemand::value&& val,
+inline bool get_bool_or_default(simdjson::ondemand::value& val,
                                 std::string_view key, bool def = false) {
   auto result = val[key].get_bool();
   return result.error() == simdjson::SUCCESS ? result.value() : def;
 }
 
-inline int64_t get_int64_or_default(simdjson::ondemand::value&& val,
+inline int64_t get_int64_or_default(simdjson::ondemand::value& val,
                                     std::string_view key, int64_t def = 0) {
   auto result = val[key].get_int64();
   return result.error() == simdjson::SUCCESS ? result.value() : def;

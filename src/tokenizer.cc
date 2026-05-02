@@ -30,19 +30,17 @@ std::shared_ptr<AddedVocabulary> parseAddedVocabulary(
   if (added_tokens_result.error() == simdjson::SUCCESS) {
     std::vector<AddedToken> added_tokens;
     for (auto element : added_tokens_result) {
-      int id = get_int64_or_default(std::move(element), "id");
-      std::string content =
-          get_string_or_default(std::move(element), "content");
-      bool single_word =
-          get_bool_or_default(std::move(element), "single_word", false);
-      bool lstrip = get_bool_or_default(std::move(element), "lstrip", false);
-      bool rstrip = get_bool_or_default(std::move(element), "rstrip", false);
-      bool normalized =
-          get_bool_or_default(std::move(element), "normalized", false);
+      simdjson::ondemand::value element_val = element.value();
+      int id = get_int64_or_default(element_val, "id");
+      std::string content = get_string_or_default(element_val, "content");
+      bool single_word = get_bool_or_default(element_val, "single_word", false);
+      bool lstrip = get_bool_or_default(element_val, "lstrip", false);
+      bool rstrip = get_bool_or_default(element_val, "rstrip", false);
+      bool normalized = get_bool_or_default(element_val, "normalized", false);
       bool special_token =
-          get_bool_or_default(std::move(element), "special_token", true);
-      added_tokens.emplace_back(id, content, single_word, lstrip, rstrip,
-                                normalized, special_token);
+          get_bool_or_default(element_val, "special_token", true);
+      added_tokens.emplace_back(id, std::move(content), single_word, lstrip,
+                                rstrip, normalized, special_token);
     }
     return std::make_shared<AddedVocabulary>(added_tokens);
   }
@@ -55,14 +53,14 @@ std::shared_ptr<normalizers::Normalizer> parseNormalizer(
   if (config.is_null())
     return nullptr;
 
-  std::string type = get_string_or_default(std::move(config), "type");
+  std::string type = get_string_or_default(config, "type");
 
   if (type == "BertNormalizer") {
     return std::make_shared<normalizers::BertNormalizer>(
-        get_bool_or_default(std::move(config), "clean_text"),
-        get_bool_or_default(std::move(config), "handle_chinese_chars"),
-        get_bool_or_default(std::move(config), "strip_accents", true),
-        get_bool_or_default(std::move(config), "lowercase"));
+        get_bool_or_default(config, "clean_text"),
+        get_bool_or_default(config, "handle_chinese_chars"),
+        get_bool_or_default(config, "strip_accents", true),
+        get_bool_or_default(config, "lowercase"));
   }
 
   return nullptr;
@@ -73,7 +71,7 @@ std::shared_ptr<pre_tokenizers::PreTokenizer> parsePreTokenizer(
   if (config.is_null())
     return nullptr;
 
-  std::string type = get_string_or_default(std::move(config), "type");
+  std::string type = get_string_or_default(config, "type");
 
   if (type == "BertPreTokenizer") {
     return std::make_shared<pre_tokenizers::BertPreTokenizer>();
@@ -86,7 +84,7 @@ std::shared_ptr<models::Model> parseModel(simdjson::ondemand::value& config) {
   if (config.is_null())
     return nullptr;
 
-  std::string type = get_string_or_default(std::move(config), "type");
+  std::string type = get_string_or_default(config, "type");
 
   if (type == "WordPiece") {
     std::unordered_map<std::string, int> vocab;
@@ -96,9 +94,9 @@ std::shared_ptr<models::Model> parseModel(simdjson::ondemand::value& config) {
     }
 
     return std::make_shared<models::WordPiece>(
-        vocab, get_string_or_default(std::move(config), "unk_token"),
-        get_string_or_default(std::move(config), "continuing_subword_prefix"),
-        get_int64_or_default(std::move(config), "max_input_chars_per_word", 0));
+        vocab, get_string_or_default(config, "unk_token"),
+        get_string_or_default(config, "continuing_subword_prefix"),
+        get_int64_or_default(config, "max_input_chars_per_word", 0));
   }
 
   return nullptr;
@@ -109,7 +107,7 @@ std::shared_ptr<post_processors::PostProcessor> parsePostProcessor(
   if (config.is_null())
     return nullptr;
 
-  std::string type = get_string_or_default(std::move(config), "type");
+  std::string type = get_string_or_default(config, "type");
 
   if (type == "TemplateProcessing") {
     std::vector<post_processors::TemplateProcessor> single;
@@ -167,12 +165,12 @@ std::shared_ptr<decoders::Decoder> parseDecoder(
   if (config.is_null())
     return nullptr;
 
-  std::string type = get_string_or_default(std::move(config), "type");
+  std::string type = get_string_or_default(config, "type");
 
   if (type == "WordPiece") {
     return std::make_shared<decoders::WordPieceDecoder>(
-        get_string_or_default(std::move(config), "prefix", "##"),
-        get_bool_or_default(std::move(config), "cleanup", true));
+        get_string_or_default(config, "prefix", "##"),
+        get_bool_or_default(config, "cleanup", true));
   }
 
   return nullptr;
@@ -297,8 +295,8 @@ Encoding Tokenizer::EncodeSingleSequence(icu::UnicodeString* unicode_input,
   std::vector<pre_tokenizers::PreTokenizerResult> pre_tokenized_splits;
   for (const normalizers::NormalizerResult& split : normalized_splits) {
     pre_tokenizers::PreTokenizerResult pre_tokenized =
-        pre_tokenizers::PreTokenizerResult({split.normalized});
-    pre_tokenized.pre_pre_tokenized = split.pre_normalized;
+        pre_tokenizers::PreTokenizerResult({split.normalized},
+                                           split.pre_normalized);
     pre_tokenized_splits.emplace_back(pre_tokenized);
   }
   if (pre_tokenizer.get() != nullptr) {
@@ -310,7 +308,6 @@ Encoding Tokenizer::EncodeSingleSequence(icu::UnicodeString* unicode_input,
   }
   Encoding encoding;
   if (model.get() != nullptr) {
-    int word_id = -1;
     for (const pre_tokenizers::PreTokenizerResult& pre_tokenized :
          pre_tokenized_splits) {
       for (int i = 0; i < pre_tokenized.pre_tokenized.size(); i++) {
